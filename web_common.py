@@ -13,13 +13,12 @@ def __get_yesterday_pdc(username):
     month_start_date = datetime(year=today.year, month=today.month, day=1).date()
     week_start_date = (today + timedelta(days=-today.weekday())).date()
     begin_date = month_start_date if month_start_date < week_start_date else week_start_date
-    begin_date = begin_date + timedelta(days=-1)
+    #begin_date = begin_date + timedelta(days=-1)
 
     yesterday_m_pdc = 0
     yesterday_w_pdc = 0
 
     while begin_date < today.date():
-        begin_date = begin_date + timedelta(days=1)
 
         key = 'user_data:%s:%s' % (username, begin_date.strftime('%Y-%m-%d'))
 
@@ -32,6 +31,7 @@ def __get_yesterday_pdc(username):
             yesterday_m_pdc += history_data.get('pdc')
         if begin_date >= week_start_date:
             yesterday_w_pdc += history_data.get('pdc')
+        begin_date = begin_date + timedelta(days=1)
 
     return yesterday_m_pdc, yesterday_w_pdc
 
@@ -208,8 +208,6 @@ def dashboard_DoD_income():
 
     today_speed_data = b_today_user_data.get('speed_stat')
     yesterday_speed_data = b_yesterday_user_data.get('speed_stat')
-    print("========================today_speed_data", today_speed_data)
-    print("========================yesterday_speed_data", yesterday_speed_data)
 
     for i in range(0, 24):
         if yesterday_speed_data is not None:

@@ -19,15 +19,11 @@ redis_conf = conf.REDIS_CONF
 pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)
 
-debugger = False
-debugger_username = '15983770748@163.com'
 
 from api import *
-
+import sys
 
 def get_data(username):
-    if debugger and username != debugger_username:
-        return
     start_time = datetime.now()
     try:
         for user_id in r_session.smembers('accounts:%s' % username):
@@ -42,6 +38,8 @@ def get_data(username):
             user_id = account_info.get('user_id')
 
             cookies = dict(sessionid=session_id, userid=str(user_id))
+
+            open_giftbox(username, cookies)
 
             mine_info = get_mine_info(cookies)
 
@@ -87,11 +85,11 @@ def get_data(username):
             else:
                 account_data['zqb_speed_stat'] = get_speed_stat('1', cookies)
                 account_data['old_speed_stat'] = get_speed_stat('0', cookies)
-
             account_data['updated_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             account_data['mine_info'] = mine_info
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = get_income_info(cookies)
+            account_data['giftbox_info'] = get_giftbox(cookies)
 
             if is_api_error(account_data.get('income')):
                 print(user_id, 'income', 'error')
@@ -129,6 +127,9 @@ def save_history(username):
     today_data['income'] = 0
     today_data['speed_stat'] = list()
     today_data['pdc_detail'] = []
+    today_data['giftbox_detail'] = []
+    today_data['giftbox_pdc'] = 0
+
 
     for user_id in r_session.smembers('accounts:%s' % username):
         # 获取账号所有数据
@@ -154,6 +155,14 @@ def save_history(username):
 
         today_data['balance'] += data.get('income').get('r_can_use')
         today_data['income'] += data.get('income').get('r_h_a')
+        today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc') 
+        if data.get('giftbox_info') is not None:
+            print("DEBUG======= in if now", user_id)
+            for box in data.get('giftbox_info'):
+                print("DEBUG======= box", box)
+                sys.stdout.flush()
+                today_data['giftbox_detail'].append(dict(boxid=box.get('id'), 
+                                                      boxcnum=box.get('cnum'), userid=str(user_id)))
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
 
@@ -220,8 +229,6 @@ def get_offline_user_data():
         user_info = json.loads(b_user.decode('utf-8'))
 
         username = user_info.get('username')
-        if username != debugger_username and debugger:
-            continue
 
         if not user_info.get('active'):
             continue
@@ -286,6 +293,22 @@ def collect_crystal():
     pool.map(check_collect, (json.loads(c.decode('utf-8')) for c in r_session.smembers('global:auto.collect.cookies')))
     pool.close()
     pool.join()
+
+
+def open_giftbox(username, cookies):
+    str_today = datetime.now().strftime('%Y-%m-%d')
+    key = 'user_data:%s:%s' % (username, str_today)
+    b_today_data = r_session.get(key)
+    today_data = dict()
+    if b_today_data is not None:
+        today_data = json.loads(b_today_data.decode('utf-8'))
+    if today_data is not None and today_data.get('giftbox_detail') is not None:
+        for box in today_data.get('giftbox_detail'):
+            #only open free giftbox
+            if box.get('boxcnum') == 0:
+                r = open_stone(box.get('boxid'), cookies)
+                print("DEBUG =======================================open free gift box")
+                print("DEBUG==== num is", r.get('num'))
 
 
 def timer(func, seconds):

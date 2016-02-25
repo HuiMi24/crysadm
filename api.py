@@ -7,6 +7,7 @@ from requests.adapters import HTTPAdapter
 import time
 from urllib.parse import urlparse, parse_qs
 
+import sys
 requests.packages.urllib3.disable_warnings()
 
 server_address = 'http://2-api-red.xunlei.com'
@@ -172,6 +173,52 @@ def get_speed_stat(s_type, cookies):
         __handle_exception(rd=r.reason)
         return [0] * 24
     return json.loads(r.text).get('sds')
+
+
+def get_giftbox(cookies):
+    if len(cookies.get('sessionid')) == 128:
+        cookies['origin'] = '4'
+    else:
+        cookies['origin'] = '1'
+    headers = agent_header
+    url = server_address + '/?r=usr/giftbox'
+
+    body = dict(tp='0', p='0', ps='60', t='', v='2', cmid='-1')
+    this_cookies = cookies.copy()
+    if len(this_cookies.get('sessionid')) != 128:
+        this_cookies['origin'] = "2"
+    try:
+        r = requests.post(url=url, verify=False, data=body, cookies=this_cookies,
+                          headers=headers, timeout=10)
+    except requests.exceptions.RequestException as e:
+        return __handle_exception(e=e)
+    if r.status_code != 200:
+        return __handle_exception(rd=r.reason)
+    print("DEBUG===== ", json.loads(r.text))
+    sys.stdout.flush()
+    return json.loads(r.text).get('ci') 
+
+
+def open_stone(giftbox_id, cookies):
+    if len(cookies.get('sessionid')) == 128:
+        cookies['origin'] = '4'
+    else:
+        cookies['origin'] = '1'
+    
+    body = dict(v='1', id = giftbox_id, side='1')
+    url = server_address + '/?r=usr/openStone'
+    headers = agent_header
+    this_cookies = cookies.copy()
+    if len(this_cookies.get('sessionid')) != 128:
+        this_cookies['origin'] = "2" 
+    try:
+        r = requests.post(url=url, verify=False, data=body, cookies=this_cookies,
+                          headers=headers, timeout=10)
+    except requests.exceptions.RequestException as e:
+        return __handle_exception(e=e)
+    if r.status_code != 200:
+        return __handle_exception(rd=r.reason)
+    return json.loads(r.text).get('get')
 
 
 def get_privilege(cookies):

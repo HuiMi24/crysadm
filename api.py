@@ -194,8 +194,6 @@ def get_giftbox(cookies):
         return __handle_exception(e=e)
     if r.status_code != 200:
         return __handle_exception(rd=r.reason)
-    print("DEBUG===== ", json.loads(r.text))
-    sys.stdout.flush()
     return json.loads(r.text).get('ci') 
 
 
@@ -205,19 +203,18 @@ def open_stone(giftbox_id, cookies):
     else:
         cookies['origin'] = '1'
     
-    body = dict(v='1', id = giftbox_id, side='1')
+    body = dict(v='1', id = str(giftbox_id), side='1')
     url = server_address + '/?r=usr/openStone'
     headers = agent_header
-    this_cookies = cookies.copy()
-    if len(this_cookies.get('sessionid')) != 128:
-        this_cookies['origin'] = "2" 
     try:
-        r = requests.post(url=url, verify=False, data=body, cookies=this_cookies,
+        r = requests.post(url=url, verify=False, data=body, cookies=cookies,
                           headers=headers, timeout=10)
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
     if r.status_code != 200:
         return __handle_exception(rd=r.reason)
+    print("DEEBUG=======", json.loads(r.text))
+    sys.stdout.flush()
     return json.loads(r.text).get('get')
 
 

@@ -39,8 +39,6 @@ def get_data(username):
 
             cookies = dict(sessionid=session_id, userid=str(user_id))
 
-            open_giftbox(username, cookies)
-
             mine_info = get_mine_info(cookies)
 
             if is_api_error(mine_info):
@@ -90,6 +88,7 @@ def get_data(username):
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = get_income_info(cookies)
             account_data['giftbox_info'] = get_giftbox(cookies)
+            open_giftbox(account_data['giftbox_info'], cookies)
 
             if is_api_error(account_data.get('income')):
                 print(user_id, 'income', 'error')
@@ -155,14 +154,8 @@ def save_history(username):
 
         today_data['balance'] += data.get('income').get('r_can_use')
         today_data['income'] += data.get('income').get('r_h_a')
-        today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc') 
-        if data.get('giftbox_info') is not None:
-            print("DEBUG======= in if now", user_id)
-            for box in data.get('giftbox_info'):
-                print("DEBUG======= box", box)
-                sys.stdout.flush()
-                today_data['giftbox_detail'].append(dict(boxid=box.get('id'), 
-                                                      boxcnum=box.get('cnum'), userid=str(user_id)))
+        today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
+
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
 
@@ -295,18 +288,11 @@ def collect_crystal():
     pool.join()
 
 
-def open_giftbox(username, cookies):
-    str_today = datetime.now().strftime('%Y-%m-%d')
-    key = 'user_data:%s:%s' % (username, str_today)
-    b_today_data = r_session.get(key)
-    today_data = dict()
-    if b_today_data is not None:
-        today_data = json.loads(b_today_data.decode('utf-8'))
-    if today_data is not None and today_data.get('giftbox_detail') is not None:
-        for box in today_data.get('giftbox_detail'):
-            #only open free giftbox
-            if box.get('boxcnum') == 0:
-                r = open_stone(box.get('boxid'), cookies)
+def open_giftbox(giftbox_info, cookies):
+    if giftbox_info is not None:
+        for box in giftbox_info:
+            if box.get('cnum') == 0:
+                r = open_stone(box.get('id'), cookies)
                 print("DEBUG =======================================open free gift box")
                 print("DEBUG==== num is", r.get('num'))
 

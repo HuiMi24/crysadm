@@ -230,6 +230,7 @@ def dashboard_DoD_income():
 
         if today_speed_data is not None:
             today_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in today_speed_data))
+    today_speed_series['data'].append(today_data_new.get('last_speed')*8)
 
     now_income_value = sum(today_series['data'][0:now.hour])
     dod_income_value = sum(yesterday_series['data'][:now.hour])

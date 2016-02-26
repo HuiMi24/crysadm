@@ -15,7 +15,7 @@ elif socket.gethostname() == 'iZ23bo17lpkZ':
 else:
     conf = config.TestingConfig
 
-conf = config.ProductionConfig
+conf = config.TestingConfig
 redis_conf = conf.REDIS_CONF
 pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)

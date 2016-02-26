@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import json
 import socket
 import struct
+import sys
 
 # 获取前一日收益
 def __get_yesterday_pdc(username):
@@ -190,8 +191,6 @@ def dashboard_DoD_income():
     now = datetime.now()
     key = 'user_data:%s:%s' % (username, now.strftime('%Y-%m-%d'))
     b_today_data_new = r_session.get(key)
-    if b_today_data_new is None: 
-        return Response(json.dumps(dict(data=[])), mimetype='application/json')
     today_data_new = json.loads(b_today_data_new.decode('utf-8'))
     
     today_series['data'] = []

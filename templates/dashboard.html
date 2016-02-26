@@ -43,6 +43,26 @@
         <div class="col-lg-3 col-md-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
+                    <span class="label label-success pull-right" style="padding-top: 5px;">实时</span>
+                    <h5>下载速度</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-arrow-circle-down fa-4x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right" style="padding-left: 5px;">
+                            <h1 class="no-margins" style=" font-weight: bold;" id="down_speed"></h1>
+                            <small style=" font-weight: bold;"><span id="speed2_unit"></span>B/s</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
                     <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
                     <h5>水晶产量</h5>
                 </div>
@@ -112,41 +132,37 @@
         </div>
     </div>
     <div class="row">
-                    <div class="col-lg-12">
-                        <div class="ibox float-e-margins">
-                            <div class="ibox-title">
-                                <h5>同比产量</h5>
-
-                            </div>
-                            <div class="ibox-content">
-                                <div class="row">
-                                <div class="col-md-10">
-                                    <div id="DoD-income" style="height: 200px;min-width: 300px;"></div>
-                                </div>
-                                <div class="col-md-2" id="expected_info">
-                                    <ul class="stat-list" style="margin-top:15px;">
-                                        <li>
-                                            <h2 class="no-margins " id="dod_income">-</h2>
-                                            <small>昨日同比产量</small>
-
-                                        </li>
-                                        <li>
-                                            <h2 class="no-margins" id="last_day_income">-</h2>
-                                            <small>昨日总产量</small>
-                                        </li>
-                                        <li>
-                                            <h2 class="no-margins " id="expected_income">-</h2>
-                                            <small>今日预计产量</small>
-                                        </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                </div>
-
-                            </div>
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>同比产量</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div id="DoD-income" style="height: 200px;min-width: 300px;"></div>
+                        </div>
+                        <div class="col-md-2" id="expected_info">
+                            <ul class="stat-list" style="margin-top:15px;">
+                                <li>
+                                    <h2 class="no-margins " id="dod_income">-</h2>
+                                    <small>昨日同比产量</small>
+                                </li>
+                                <li>
+                                    <h2 class="no-margins" id="last_day_income">-</h2>
+                                    <small>昨日总产量</small>
+                                </li>
+                                <li>
+                                    <h2 class="no-margins " id="expected_income">-</h2>
+                                    <small>今日预计产量</small>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- /.row -->
     <div class="row">
         <div class="col-lg-6">
@@ -155,14 +171,10 @@
                 <div class="ibox-content">
                     <div>
                         <span class="pull-right text-right">
-                            <small>实时矿机上传速度
-                                <strong></strong></small>
+                            <small>实时矿机上传速度<strong></strong></small>
                             <br>
-
                         </span>
-                        <h3 class="font-bold no-margins">
-                            速度分析器
-                        </h3>
+                        <h3 class="font-bold no-margins">速度分析器</h3>
                         <small></small>
                     </div>
                     <div id="speed-share" style="height: 200px;min-width: 300px;"></div>
@@ -177,14 +189,10 @@
                 <div class="ibox-content">
                     <div>
                         <span class="pull-right text-right">
-                            <small>今日矿场产量
-                                <strong></strong></small>
+                            <small>今日矿场产量<strong></strong></small>
                             <br>
-
                         </span>
-                        <h3 class="font-bold no-margins">
-                            产量分析器
-                        </h3>
+                        <h3 class="font-bold no-margins">产量分析器</h3>
                         <small></small>
                     </div>
                     <div id="today-income-share" style="height: 200px;min-width: 300px;"></div>
@@ -202,14 +210,10 @@
                 <div class="ibox-content">
                     <div>
                         <span class="pull-right text-right">
-                            <small>实时速度
-                                <strong></strong></small>
+                            <small>实时速度<strong></strong></small>
                             <br>
-
                         </span>
-                        <h3 class="font-bold no-margins">
-
-                        </h3>
+                        <h3 class="font-bold no-margins"></h3>
                         <small></small>
                     </div>
                     <div id="real_time_speed" style="height: 150px;"></div>
@@ -226,14 +230,10 @@
                 <div class="ibox-content">
                     <div>
                         <span class="pull-right text-right">
-                            <small>矿机实时速度
-                                <strong></strong></small>
+                            <small>矿机实时速度<strong></strong></small>
                             <br>
-
                         </span>
-                        <h3 class="font-bold no-margins">
-
-                        </h3>
+                        <h3 class="font-bold no-margins"></h3>
                         <small></small>
                     </div>
                     <div id="speed_detail" style="height: 300px;"></div>
@@ -252,7 +252,10 @@
             if (crystal_values >= 10000) {
                 return parseInt(crystal_values / 1000) / 10 + '元';
             }
-            return crystal_values;
+            if (crystal_values >= 1000) {
+                return parseInt(crystal_values / 100) / 100 + '元';
+            }
+            return crystal_values + '个';
         }
         function convert_speed(speed) {
             if (speed >= 1024) {
@@ -329,9 +332,6 @@
                         data = r_data.data,
                         browserData = [],
                         versionsData = [];
-
-
-
                 // Build the data arrays
                 for (var i = 0; i < data.length; i += 1) {
                     browserData.push({
@@ -501,7 +501,8 @@
                         layout: 'vertical',
                         align: 'left',
                         verticalAlign: 'top',
-                        x: 150,
+                        x: 55,
+                        y: -10,
                         floating: true
                     },
                     series: data.series
@@ -586,14 +587,23 @@
                 if($('#live_speed').html() !== convert_speed(data.today_data.last_speed)){
                     $('#live_speed').html(convert_speed(data.today_data.last_speed));
 
-                    if(data.today_data.last_speed > 1024){
-                        $('#speed_unit').html('M')
-                    }else{
+                    if(data.today_data.last_speed < 1024){
                         $('#speed_unit').html('K')
+                    }else{
+                        $('#speed_unit').html('M')
                     }
                     flash_element($('#live_speed'));
                 }
+                if($('#down_speed').html() !== convert_speed(data.today_data.deploy_speed)){
+                    $('#down_speed').html(convert_speed(data.today_data.deploy_speed));
 
+                    if(data.today_data.deploy_speed < 1024){
+                        $('#speed2_unit').html('K')
+                    }else{
+                        $('#speed2_unit').html('M')
+                    }
+                    flash_element($('#down_speed'));
+                }
                 if($('#pdc').html() !== convert_to_yuan(data.today_data.pdc)) {
                     $('#pdc').html(convert_to_yuan(data.today_data.pdc));
                     flash_element($('#pdc'));

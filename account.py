@@ -1,3 +1,6 @@
+#! /usr/bin/env python3.4
+# -*- coding: utf-8 -*-
+# account.py - tool function for xunlei account web GUI
 __author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
@@ -7,7 +10,7 @@ from util import md5
 from login import login
 from datetime import datetime
 
-
+# 显示所有绑定的迅雷会员帐号
 @app.route('/accounts')
 @requires_auth
 def accounts():
@@ -27,10 +30,11 @@ def accounts():
 
     return render_template('accounts.html', err_msg=err_msg, accounts=account_s)
 
-
+# 绑定一个新的迅雷会员帐号
 @app.route('/account/add', methods=['POST'])
 @requires_auth
 def account_add():
+    # 获取表单提交的迅雷会员名和帐户密码
     account_name = request.values.get('xl_username')
     password = request.values.get('xl_password')
     md5_password = md5(password)
@@ -40,7 +44,7 @@ def account_add():
     accounts_key = 'accounts:%s' % user.get('username')
 
     if user.get('max_account_no') is None:
-        user['max_account_no'] = 2
+        user['max_account_no'] = 5
 
     account_no = r_session.scard(accounts_key)
 
@@ -74,7 +78,7 @@ def account_add():
 
     return redirect(url_for('accounts'))
 
-
+# 删除绑定的迅雷会员帐号
 @app.route('/account/del/<xl_id>', methods=['POST'])
 @requires_auth
 def account_del(xl_id):
@@ -87,7 +91,7 @@ def account_del(xl_id):
     r_session.delete(account_data_key)
     return redirect(url_for('accounts'))
 
-
+# 停止一个已经绑定的迅雷会员帐号
 @app.route('/account/inactive/<xl_id>', methods=['POST'])
 @requires_auth
 def account_inactive(xl_id):
@@ -100,7 +104,7 @@ def account_inactive(xl_id):
 
     return redirect(url_for('accounts'))
 
-
+# 激活一个已经停止的迅雷会员帐号
 @app.route('/account/active/<xl_id>', methods=['POST'])
 @requires_auth
 def account_activel(xl_id):

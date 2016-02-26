@@ -23,7 +23,12 @@
                 <div class="ibox-title" style="height:42px;">
                     今日统计
                     <div class="ibox-tools">
-                        <form role="form" action="/collect/all" method="post">
+                        {% if show_drawcash %}
+                        <form role="form" style="margin-left: 10px; float:right;" action="/drawcash/all" method="post">
+                            <button type="submit" style="margin: 0px;" onclick="javascript:return confirm('确认要提取所有迅雷帐户?')" class="btn btn-info btn-xs">所有帐户提现</button>
+                        </form>
+                        {% endif %}
+                        <form role="form" style="float:right;" action="/collect/all" method="post">
                             <button type="submit" style="margin: 0px;" onclick="javascript:return confirm('确认要收取所有水晶?')" class="btn btn-info btn-xs">收取所有水晶</button>
                         </form>
                     </div>
@@ -33,9 +38,8 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
-
                                 <th class="col-md-1">矿主ID</th>
-                                <th class="col-md-1">赚钱宝</th>
+                                <th class="col-md-1">水晶产量</th>
                                 <th class="col-md-1 hidden-xs">老式矿机</th>
                                 <th class="col-md-1 hidden-xs">雇佣矿机</th>
                                 <th class="col-md-1 hidden-xs">宝箱</th>
@@ -49,7 +53,6 @@
                             <tbody>
                             {% for row in accounts %}
                                 {% if row.data is defined and row.data.mine_info.r == 0 %}
-
                                     <tr class="tooltip-demo">
                                         <td data-original-title="{% if row.session_id|length == 128 %}Advanced{% else %}Standard{% endif %}" data-toggle="tooltip" data-placement="top" >{{ row.data.privilege.mid |e }}</td>
                                         <td>{{ row.data.mine_info.dev_m.pdc |default('0') }}</td>
@@ -90,7 +93,6 @@
                 </div>
                 <!-- /.panel-heading -->
                 <div class="ibox-content">
-
                     <div class="table-responsive">
                         <table class="table" name="miner_list">
                             <thead>
@@ -132,18 +134,12 @@
                                                 <td>-</td>
                                                 <td{% if dev.upgrade %} style="min-width: 110px;" {% endif %}>
                                                     {% if dev.status == 'online' %}
-                                                        <span class="label label-info">
-                                                                在线
-                                                                </span>
+                                                        <span class="label label-info">在线</span>
                                                     {% else %}
-                                                        <span class="label label-warning">
-                                                                断网
-                                                                </span>
+                                                        <span class="label label-warning">断网</span>
                                                     {% endif %}
                                                     {% if dev.upgrade %}
-                                                        <span class="label label-danger">
-                                                                有升级
-                                                                </span>
+                                                        <span class="label label-danger">有升级</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="hidden-xs">{{ dev.ip | e }}</td>
@@ -171,24 +167,17 @@
                                                     <td>{{ (detail.space_used|int/1024/1024/1024)|int }}/{{ (detail.space_quota|int/1024/1024/1024)|int }}</td>
                                                     <td{% if dev.upgrade %} style="min-width: 110px;" {% endif %}>
                                                         {% if detail.status == 'running' %}
-                                                            <span class="label label-info">
-                                                                正常
-                                                                </span>
+                                                            <span class="label label-info">正常</span>
                                                         {% else %}
-                                                            <span class="label label-warning">
-                                                                断网
-                                                                </span>
+                                                            <span class="label label-warning">断网</span>
                                                         {% endif %}
                                                         {% if dev.upgrade %}
-                                                            <span class="label label-danger">
-                                                                有升级
-                                                                </span>
+                                                            <span class="label label-danger">有升级</span>
                                                         {% endif %}
                                                     </td>
                                                     <td class="hidden-xs">{{ dev.ip | e }}</td>
                                                     <td>
                                                         {% if loop.first %}
-
                                                         <form style="float:right;" role="form" action="/reboot_device" method="post">
                                                             <input type="hidden" name="device_id" value="{{ dev.device_id }}" />
                                                             <input type="hidden" name="account_id" value="{{ dev.account_name }}" />
@@ -208,20 +197,12 @@
                             </tbody>
                         </table>
                     </div>
-
-
-
-
-
                     <!-- /.table-responsive -->
-
-
                 </div>
                 <!-- /.panel-body -->
             </div>
             <!-- /.panel -->
         </div>
-
     </div>
 {% endblock %}
 {% block js_logic %}
@@ -265,7 +246,6 @@
 
     </script>
 {% endblock %}
-
 
 {% block navibar %}
     <div class="col-lg-10">

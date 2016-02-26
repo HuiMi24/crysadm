@@ -1,3 +1,4 @@
+# Html － Crysadm 管理员界面
 __author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
@@ -9,7 +10,7 @@ import re
 import random
 from message import send_msg
 
-
+# 系统管理 => 用户管理
 @app.route('/admin/user')
 @requires_admin
 def admin_user():
@@ -30,13 +31,13 @@ def admin_user():
                                                      reverse=True),
                            users=users)
 
-
+# 系统管理 => 通知管理
 @app.route('/admin/message')
 @requires_admin
 def admin_message():
     return render_template('admin_message.html')
 
-
+# 系统管理 => 邀请管理
 @app.route('/admin/invitation')
 @requires_admin
 def admin_invitation():
@@ -45,7 +46,7 @@ def admin_invitation():
     inv_codes = r_session.smembers('invitation_codes')
     return render_template('admin_invitation.html', inv_codes=inv_codes, public_inv_codes=pub_inv_codes)
 
-
+# 系统管理 => 邀请管理 => 生成邀请码
 @app.route('/generate/inv_code', methods=['POST'])
 @requires_admin
 def generate_inv_code():
@@ -57,7 +58,7 @@ def generate_inv_code():
 
     return redirect(url_for('admin_invitation'))
 
-
+# 系统管理 => 邀请管理 => 生成公开邀请码
 @app.route('/generate/pub_inv_code', methods=['POST'])
 @requires_admin
 def generate_pub_inv_code():
@@ -70,7 +71,7 @@ def generate_pub_inv_code():
 
     return redirect(url_for('admin_invitation'))
 
-
+# 系统管理 => 用户管理 => 登陆其它用户
 @app.route('/admin/login_as/<username>', methods=['POST'])
 @requires_admin
 def generate_login_as(username):
@@ -85,7 +86,7 @@ def generate_login_as(username):
 
     return redirect(url_for('dashboard'))
 
-
+# 系统管理 => 用户管理 => 编辑用户资料
 @app.route('/admin_user/<username>')
 @requires_admin
 def admin_user_management(username):
@@ -98,7 +99,7 @@ def admin_user_management(username):
 
     return render_template('user_management.html', user=user, err_msg=err_msg)
 
-
+# 系统管理 => 用户管理 => 编辑用户资料 => 修改密码
 @app.route('/admin/change_password/<username>', methods=['POST'])
 @requires_admin
 def admin_change_password(username):
@@ -116,7 +117,7 @@ def admin_change_password(username):
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
-
+# 系统管理 => 用户管理 => 编辑用户资料 => 修改其它属性
 @app.route('/admin/change_property/<field>/<value>/<username>', methods=['POST'])
 @requires_admin
 def admin_change_property(field, value, username):
@@ -134,7 +135,7 @@ def admin_change_property(field, value, username):
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
-
+# 系统管理 => 用户管理 => 编辑用户资料 => 提示信息
 @app.route('/admin/change_user_info/<username>', methods=['POST'])
 @requires_admin
 def admin_change_user_info(username):
@@ -159,7 +160,7 @@ def admin_change_user_info(username):
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
-
+# 系统管理 => 用户管理 => 删除用户
 @app.route('/admin/del_user/<username>', methods=['GET'])
 @requires_admin
 def admin_del_user(username):
@@ -181,7 +182,7 @@ def admin_del_user(username):
 
     return redirect(url_for('admin_user'))
 
-
+# 系统管理 => 用户管理 => 无用户？
 @app.route('/none_user')
 @requires_admin
 def none_user():
@@ -204,7 +205,7 @@ def none_user():
 
     return json.dumps(dict(none_xlAcct=none_xlAcct, none_active_xlAcct=none_active_xlAcct))
 
-
+# 系统管理 => 用户管理 => 删除无用户？
 @app.route('/del_none_user')
 @requires_admin
 def del_none_user():
@@ -226,7 +227,7 @@ def del_none_user():
 
     return json.dumps(dict(none_active_xlAcct=none_active_xlAcct))
 
-
+# 系统管理 => 通知管理 => 发送通知
 @app.route('/admin/message/send', methods=['POST'])
 @requires_admin
 def admin_message_send():

@@ -74,6 +74,21 @@
                                     </span>
                                 </div>
                             </form>
+                            <form role="form" action="/user/change_property/auto_drawcash/{% if user_info.auto_drawcash  %}0{% else %}1{% endif %}" method="post">
+
+                                <div class="form-group input-group">
+                                     <span class="input-group-addon"><i style="width: 16px;" class="fa fa-rmb"></i>
+                                                </span>
+                                    <input type="text" class="form-control" value="{% if user_info.auto_drawcash %}O{% else %}X{% endif %}" disabled>
+                                    <span class="input-group-btn" style="padding-top: 0px;padding-bottom: 0px;">
+                                        {% if user_info.auto_drawcash  %}
+                                            <button type="submit" class="btn btn-danger" style="text-align:left; width: 117px;">取消自动提现</button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-success">自动提现</button>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </form>
                             <form role="form" action="/user/change_info" method="post">
                                 <div class="form-group input-group">
                                     <span class="input-group-addon"><span style="width: 16px; display: inline-block;">@</span></span>

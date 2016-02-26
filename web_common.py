@@ -6,9 +6,8 @@ from datetime import datetime, timedelta
 import json
 import socket
 import struct
-import sys
 
-
+# 获取前一日收益
 def __get_yesterday_pdc(username):
     today = datetime.now()
     month_start_date = datetime(year=today.year, month=today.month, day=1).date()
@@ -36,13 +35,13 @@ def __get_yesterday_pdc(username):
 
     return yesterday_m_pdc, yesterday_w_pdc
 
-
+# 显示控制面板
 @app.route('/dashboard')
 @requires_auth
 def dashboard():
     return render_template('dashboard.html')
 
-
+# 刷新控制面板数据
 @app.route('/dashboard_data')
 @requires_auth
 def dashboard_data():
@@ -57,6 +56,7 @@ def dashboard_data():
             'updated_time': '2015-01-01 00:00:00',
             'm_pdc': 0,
             'last_speed': 0,
+            'deploy_speed' : 0,
             'w_pdc': 0,
             'yesterday_m_pdc': 0,
             'speed_stat': [],
@@ -83,7 +83,7 @@ def dashboard_data():
 
     return Response(json.dumps(dict(today_data=today_data)), mimetype='application/json')
 
-
+# 刷新控制面板图表速度数据
 @app.route('/dashboard/speed_share')
 @requires_auth
 def dashboard_speed_share():
@@ -104,15 +104,17 @@ def dashboard_speed_share():
         for device_info in account_info.get('device_info'):
             if device_info.get('status') != 'online':
                 continue
-            speed = int(int(device_info.get('dcdn_upload_speed')) / 1024)
-            total_speed += speed
-            device_speed.append(dict(name=device_info.get('device_name'), value=speed))
+            uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)            
+            total_speed += uploadspeed            
+            device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))            
+            # device_speed.append(dict(name=device_info.get('device_name'), value=total_speed))
 
+        # 显示在速度分析器圆形图表上的设备ID
         drilldown_data.append(dict(name='矿主ID:' + mid, value=total_speed, drilldown_data=device_speed))
 
     return Response(json.dumps(dict(data=drilldown_data)), mimetype='application/json')
 
-
+# 显示控制面板速度详情
 @app.route('/dashboard/speed_detail')
 @requires_auth
 def dashboard_speed_detail():
@@ -132,8 +134,7 @@ def dashboard_speed_detail():
             upload_speed = int(int(device_info.get('dcdn_upload_speed')) / 1024)
             deploy_speed = int(device_info.get('dcdn_download_speed') / 1024)
 
-            device_speed.append(dict(name=device_info.get('device_name'), upload_speed=upload_speed,
-                                     deploy_speed=deploy_speed))
+            device_speed.append(dict(name=device_info.get('device_name'), upload_speed=upload_speed, deploy_speed=deploy_speed))
 
     device_speed = sorted(device_speed, key=lambda k: k.get('name'))
     categories = []
@@ -144,10 +145,9 @@ def dashboard_speed_detail():
         upload_series.get('data').append(d_s.get('upload_speed'))
         deploy_series.get('data').append(d_s.get('deploy_speed'))
 
-    return Response(json.dumps(dict(categories=categories, series=[upload_series, deploy_series])),
-                    mimetype='application/json')
+    return Response(json.dumps(dict(categories=categories, series=[upload_series, deploy_series])), mimetype='application/json')
 
-
+# 刷新今日收益
 @app.route('/dashboard/today_income_share')
 @requires_auth
 def dashboard_today_income_share():
@@ -249,12 +249,12 @@ def dashboard_DoD_income():
                                     )), mimetype='application/json')
 
 
-
+# 显示登录界面
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
-
+# 显示crysadm管理员界面（初次登录）
 @app.route('/install')
 def install():
     import random, uuid
@@ -266,7 +266,7 @@ def install():
         password = ''.join(random.sample(_chars, 6))
 
         user = dict(username=username, password=hash_password(password), id=str(uuid.uuid1()),
-                    active=True, is_admin=True, max_account_no=2,
+                    active=True, is_admin=True, max_account_no=5,
                     created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         r_session.set('%s:%s' % ('user', username), json.dumps(user))
         r_session.sadd('users', username)
@@ -274,14 +274,15 @@ def install():
 
     return redirect(url_for('login'))
 
-
+# 添加用户
 @app.context_processor
 def add_function():
     def convert_to_yuan(crystal_values):
         if crystal_values >= 10000:
             return str(int(crystal_values / 1000) / 10) + '元'
-        return str(crystal_values)
+        return str(crystal_values) + '个'
 
+    # 获取设备类型
     def get_device_type(device_code):
         if device_code == 'PC':
             return 'PC'
@@ -289,7 +290,6 @@ def add_function():
             return '路由'
         elif device_code == 321:
             return '赚钱宝'
-
         return '不知道'
 
     def int2ip(int_ip):
@@ -297,7 +297,7 @@ def add_function():
 
     return dict(convert_to_yuan=convert_to_yuan, get_device_type=get_device_type, int2ip=int2ip)
 
-
+# 显示消息框
 @app.context_processor
 def message_box():
     if session is None or session.get('user_info') is None:

@@ -175,6 +175,30 @@ def get_speed_stat(s_type, cookies):
     return json.loads(r.text).get('sds')
 
 
+def get_produce_stat(cookies):
+    if len(cookies.get('sessionid')) == 128:
+        cookies['origin'] = '4'
+    else:
+        cookies['origin'] = '1'
+    headers = agent_header
+    url = server_address
+
+    body = dict(r='mine/produce_stat')
+    this_cookies = cookies.copy()
+    if len(this_cookies.get('sessionid')) != 128:
+        this_cookies['origin'] = "2"
+    try:
+        r = requests.post(url=url, verify=False, data=body, cookies=this_cookies,
+                          headers=headers, timeout=10)
+    except requests.exceptions.RequestException as e:
+        return __handle_exception(e=e)
+    if r.status_code != 200:
+        return __handle_exception(rd=r.reason)
+    #print("DEBUG ===== hour list is ", json.loads(r.text) )
+    #sys.stdout.flush()
+    return json.loads(r.text) 
+
+
 def get_giftbox(cookies):
     if len(cookies.get('sessionid')) == 128:
         cookies['origin'] = '4'

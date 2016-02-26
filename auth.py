@@ -1,4 +1,4 @@
-# API È¨ÏŞ¹ÜÀí
+# API æƒé™ç®¡ç†
 __author__ = 'powergx'
 from util import hash_password
 import json
@@ -7,7 +7,7 @@ from flask import Response, request, session, redirect, url_for
 from functools import wraps
 from crysadm import r_session
 
-# ½«µ±Ç°ÓÃ»§Ìí¼Óµ½ÔÚÏßÓÃ»§ÁĞ±íµ±ÖĞ
+# å°†å½“å‰ç”¨æˆ·æ·»åŠ åˆ°åœ¨çº¿ç”¨æˆ·åˆ—è¡¨å½“ä¸­
 def __handshake():
     user = session.get('user_info')
     username = user.get('username')
@@ -18,7 +18,7 @@ def __handshake():
     r_session.setex(key, '1', 120)
     r_session.sadd('global:online.users', username)
 
-# ĞèÒª¹ÜÀíÔ±È¨ÏŞ
+# éœ€è¦ç®¡ç†å‘˜æƒé™
 def requires_admin(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -31,7 +31,7 @@ def requires_admin(f):
 
     return decorated
 
-# ĞèÒªÓÃ»§È¨ÏŞ
+# éœ€è¦ç”¨æˆ·æƒé™
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):

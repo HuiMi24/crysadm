@@ -3,7 +3,7 @@
 # config.py - configration for crysadm web and redis server
 __author__ = 'powergx'
 
-# Redis·şÎñÆ÷ÅäÖÃ
+# RedisæœåŠ¡å™¨é…ç½®
 class RedisConfig():
     def __init__(self, host, port, db, password=None):
         self.host = host
@@ -11,31 +11,31 @@ class RedisConfig():
         self.db = db
         self.password = password
 
-# Crysadm ÅäÖÃ
+# Crysadm é…ç½®
 class Config(object):
-    DEBUG = False  #²âÊÔÄ£Ê½
-    TESTING = False  #²âÊÔÄ£Ê½
-    DATABASE_URI = ''  #Êı¾İ¿âÁ´½Ó
-    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  #ÔÊĞíµÄºó×ºÃû
-    SESSION_TYPE = 'memcached'  #»º´æÀàĞÍ
-    SECRET_KEY = '7e30485a-dd01-11e4-8abd-10ddb199c373'  #°²È«ÃÜÔ¿
-    REDIS_CONF = RedisConfig(host='127.0.0.1', port=6379, db=0)  #Redis·şÎñÆ÷ÅäÖÃ
-    PASSWORD_PREFIX = "08b3db21-d120-11e4-9ttd-10ddb199c373"  #ÃÜÂëÇ°×º
-    ENCRYPT_PWD_URL = None  #Ä£Ê½
-    SERVER_IP = '0.0.0.0'  #·şÎñÆ÷IP
-    SERVER_PORT = 5000  #¶Ë¿Ú
+    DEBUG = False  #æµ‹è¯•æ¨¡å¼
+    TESTING = False  #æµ‹è¯•æ¨¡å¼
+    DATABASE_URI = ''  #æ•°æ®åº“é“¾æ¥
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  #å…è®¸çš„åç¼€å
+    SESSION_TYPE = 'memcached'  #ç¼“å­˜ç±»å‹
+    SECRET_KEY = '7e30485a-dd01-11e4-8abd-10ddb199c373'  #å®‰å…¨å¯†é’¥
+    REDIS_CONF = RedisConfig(host='127.0.0.1', port=6379, db=0)  #RedisæœåŠ¡å™¨é…ç½®
+    PASSWORD_PREFIX = "08b3db21-d120-11e4-9ttd-10ddb199c373"  #å¯†ç å‰ç¼€
+    ENCRYPT_PWD_URL = None  #æ¨¡å¼
+    SERVER_IP = '0.0.0.0'  #æœåŠ¡å™¨IP
+    SERVER_PORT = 5000  #ç«¯å£
 
-# Õı³£ÔËĞĞÊ±ÅäÖÃ
+# æ­£å¸¸è¿è¡Œæ—¶é…ç½®
 class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
 
-# ¿ª·¢ÕßÅäÖÃÄ£Ê½
+# å¼€å‘è€…é…ç½®æ¨¡å¼
 class DevelopmentConfig(Config):
     DEBUG = True
     TESTING = False
 
-# ²âÊÔÄ£Ê½
+# æµ‹è¯•æ¨¡å¼
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True

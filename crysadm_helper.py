@@ -89,6 +89,9 @@ def get_data(username):
             account_data['mine_info'] = mine_info
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = xunlei_api_get_IncomeInfo(cookies)
+            account_data['giftbox_info'] = get_giftbox(cookies)
+            account_data['produce_info'] = get_produce_stat(cookies)
+            open_giftbox(account_data['giftbox_info'], cookies)
 
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')

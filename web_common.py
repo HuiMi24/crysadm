@@ -240,8 +240,6 @@ def dashboard_DoD_income():
         expected_income = str(int((yesterday_last_value / dod_income_value) * now_income_value))
 
     dod_income_value += int((yesterday_series['data'][now.hour]) / 60 * now.minute)
-    print("DEBUG=====", yesterday_series['data'])
-    sys.stdout.flush()
     return Response(json.dumps(dict(series=[yesterday_series, today_series, yesterday_speed_series, today_speed_series],
                                     data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value,
                                               expected_income=expected_income)

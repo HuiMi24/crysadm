@@ -241,7 +241,8 @@ def prc_background_open_giftbox(cookies):
         key = 'user_data:%s:%s' % (username, str_today)
         b_today_data = r_session.get(key)
         today_data = json.loads(b_today_data.decode('utf-8'))
-        
+        if today_data.get('giftbox_detail') is None:
+            return 0
         for box in today_data.get('giftbox_detail'):
             print("DEBUG===", box)
             sys.stdout.flush()

@@ -91,7 +91,6 @@ def get_data(username):
             account_data['income'] = xunlei_api_get_IncomeInfo(cookies)
             account_data['giftbox_info'] = get_giftbox(cookies)
             account_data['produce_info'] = get_produce_stat(cookies)
-            open_giftbox(account_data['giftbox_info'], cookies)
 
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
@@ -162,6 +161,7 @@ def save_history(username):
         today_data['balance'] += data.get('income').get('r_can_use')
         today_data['income'] += data.get('income').get('r_h_a')
         today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
+        today_data['giftbox_detail'] = data.get('giftbox_info')
         today_data.get('produce_stat').append(dict(mid=data.get('privilege').get('mid'), hourly_list=data.get('produce_info').get('hourly_list')))
 
         for device in data.get('device_info'):
@@ -227,6 +227,38 @@ def prc_background_drawcash(cookies):
     if DEBUG_MODE:
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'prc_background_drawcash()')
     xunlei_api_exec_getCash2(cookies=cookies, limits=10)
+
+# exec auto open giftbox
+def prc_background_open_giftbox(cookies):
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'prc_background_collect()')
+    
+    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.smembers('users')]):
+        user_info = json.loads(b_user.decode("utf-8"))
+        username = user_info.get('username')
+
+        str_today = datetime.now().strftime('%Y-%m-%d')
+        key = 'user_data:%s:%s' % (username, str_today)
+        b_today_data = r_session.get(key)
+        today_data = json.loads(b_today_data.decode('utf-8'))
+        
+        for box in today_data.get('giftbox_detail'):
+            print("DEBUG===", box)
+            sys.stdout.flush()
+            #only open free giftbox
+            if box.get('cnum') == 0:
+                r = open_stone(box.get('id'), cookies)
+    return 0
+
+# auto open giftbox
+def background_exec_auto_open_giftbox():
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'background_exec_auto_open_giftbox()')
+
+    pool = ThreadPool(processes = 1)
+    pool.map(prc_background_open_giftbox, (json.loads(c.decode('utf-8')) for c in r_session.smembers('global:auto.collect.cookies')))
+    pool.close()
+    pool.join()
 
 # 刷新在线用户数据
 def background_refresh_online_user_data():
@@ -368,16 +400,6 @@ def background_exec_auto_drawcash():
     pool.close()
     pool.join()
 
-
-def open_giftbox(giftbox_info, cookies):
-    if giftbox_info is not None:
-        for box in giftbox_info:
-            if box.get('cnum') == 0:
-                r = open_stone(box.get('id'), cookies)
-                print("DEBUG =======================================open free gift box")
-                print("DEBUG==== num is", r.get('num'))
-
-
 def timer(func, seconds):
     while True:
         Process(target=func).start()
@@ -405,5 +427,7 @@ if __name__ == '__main__':
     # 执行自动提现函数，默认为10分钟
     # 每半小时检测一次
     threading.Thread(target=timer, args=(background_exec_auto_drawcash, 1800)).start()
+    #open giftbox every 10 mins
+    threading.Thread(target=timer, args=(background_exec_auto_open_giftbox, 600)).start()
     while True:
         time.sleep(1)

@@ -1,4 +1,5 @@
 __author__ = 'powergx'
+import sys, os
 import config, socket, redis
 import time
 from login import login
@@ -7,22 +8,15 @@ from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
 
-conf = None
-if socket.gethostname() == 'GXMBP.local':
-    conf = config.DevelopmentConfig
-elif socket.gethostname() == 'iZ23bo17lpkZ':
-    conf = config.ProductionConfig
-else:
-    conf = config.TestingConfig
+# from crysadm import conf, redis_conf, pool, r_session
 
 conf = config.ProductionConfig
 redis_conf = conf.REDIS_CONF
 pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)
 
-
 from api import *
-import sys
+
 # 获取用户数据
 def get_data(username):
     if DEBUG_MODE:
@@ -57,9 +51,6 @@ def get_data(username):
                 session_id = account_info.get('session_id')
                 user_id = account_info.get('user_id')
                 cookies = dict(sessionid=session_id, userid=str(user_id))
-                if len(session_id) == 128:
-                    cookies['origin'] = '1'
-
                 mine_info = xunlei_api_get_mine_info(cookies)
 
             if mine_info.get('r') != 0:
@@ -267,36 +258,29 @@ def background_refresh_online_user_data():
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'background_refresh_online_user_data()')
     if r_session.exists('api_error_info'):
         return
-
-    pool = ThreadPool(processes=5)
-
-    pool.map(get_data, (u.decode('utf-8') for u in r_session.smembers('global:online.users')))
-    pool.close()
-    pool.join()
+    try:
+        for user in r_session.smembers('global:online.users'):
+            get_data(user.decode('utf-8'))
+    except Exception as e:
+        return
 
 # 刷新离线用户数据
 def background_refresh_offline_user_data():    
     if r_session.exists('api_error_info') or datetime.now().minute < 50:
         return
-
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'background_refresh_offline_user_data()')
+    if DEBUG_MODE: print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'background_refresh_offline_user_data()')
 
     offline_users = []
-    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in
-                                   r_session.sdiff('users', *r_session.smembers('global:online.users'))]):
+    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.sdiff('users', *r_session.smembers('global:online.users'))]):
         user_info = json.loads(b_user.decode('utf-8'))
         username = user_info.get('username')
-        if not user_info.get('active'):
-            continue
+        if not user_info.get('active'): continue
 
         every_hour_key = 'user:%s:cron_queued' % username
-        if r_session.exists(every_hour_key):
-            continue
+        if r_session.exists(every_hour_key): continue
         offline_users.append(username)
 
-    pool = ThreadPool(processes=5)
-
+    pool = ThreadPool(processes=1)
     pool.map(get_data, offline_users)
     pool.close()
     pool.join()

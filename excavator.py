@@ -7,7 +7,7 @@ import json
 import requests
 from urllib.parse import urlparse, parse_qs, unquote
 import time
-from api import collect, ubus_cd, api_searcht_steal, api_searcht_collect, api_getaward, collect, api_summary_steal
+from api import collect, ubus_cd, api_searcht_steal, api_searcht_collect, api_getaward, collect, api_summary_steal, DEBUG_MODE
 
 # 加载矿机主页面
 @app.route('/excavators')

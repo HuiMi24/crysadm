@@ -26,6 +26,79 @@ def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60)
 
     return json.loads(r.text)
 
+# 检测用户是否有可提现的金额（周二 11:00~18:00）
+def xunlei_api_isCashDay(cookies):
+    cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
+    body = dict(hand='0', v='1', ver='1')
+    return xunlei_api_posttoxunlei(url='/?r=usr/drawcashInfo', data=body, cookies=cookies)
+# 获取帐户余额
+def xunlei_api_get_balance_inof(cookies):
+    cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
+    body = dict(hand='0', v='2', ver='1')
+    return api_post(url='/?r=usr/asset', data=body, cookies=cookies)
+# 向迅雷提交提现请求
+# cookies = 用户信息
+# money = 提现金额（元）
+def xunlei_api_require_cash(cookies, money):
+    cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
+    body = dict(hand='0', m=str(money), v='3', ver='1')
+    if DEBUG_MODE:
+        print('call from xunlei_api_require_cask(%s, %s)' % (cookies, money))
+    return api_post(url='?r=usr/drawpkg', data=body, cookies=cookies)
+# 向迅雷申请提现2
+# 增加提现下限，当可提现金额少于指定值时，不提现
+# cookies = 用户信息
+# limits = 提现下限值，单位元
+def xunlei_api_exec_getCash2(cookies, limits):
+    # 检测是否可提现
+    r = xunlei_api_isCashDay(cookies)
+    if r.get('r') != 0: 
+        return r
+    if r.get('is_tm') == 0: 
+        return dict(r=0, rd=r.get('tm_tip'))
+    # 获取帐户可提现余额
+    r = xunlei_api_get_balance_inof(cookies)
+    if r.get('r') != 0: 
+        return r
+    wc_pkg = r.get('wc_pkg')
+    # 如果设置了提取下限且帐户金额少于下限值，退出
+    if limits is not None and wc_pkg < limits: 
+        return dict(r=1, rd='帐户金额少于下限值%s元' % limits)
+    # 没有设置下限，当可提现金额大于200元时，提取200元
+    if wc_pkg > 200: 
+        wc_pkg = 200
+    # 申请提现
+    return xunlei_api_require_cash(cookies, wc_pkg)
+
+# 向迅雷申请提现
+def xunlei_api_exec_getCash(cookies):
+    # 检测是否为可提现时间
+    if DEBUG_MODE: 
+        print('call from xunlei_api_exec_getCash(cookies) ......')
+    r = xunlei_api_isCashDay(cookies)
+    if DEBUG_MODE: 
+        print(' xunlei_api_isCashDay(%s) = %s' % (cookies, r))
+    if r.get('r') != 0: 
+        return r
+    if r.get('is_tm') == 0: 
+        return dict(r=0, rd=r.get('tm_tip'))
+    # 获取帐户可提现的余额
+    r = xunlei_api_get_balance_inof(cookies)
+    if DEBUG_MODE: 
+        print(' xunlei_api_get_balance_inof(%s)= %s' % (cookies, r))
+    if r.get('r') != 0: 
+        return r
+    # 获取可提现的金额（元）
+    wc_pkg = r.get('wc_pkg')
+    if DEBUG_MODE: 
+        print(' wc_pkg = %s' % wc_pkg)
+    # 如果余额大于200，则提取200元（迅雷限制单次提取最大金额为200元）    
+    if wc_pkg > 200: 
+        wc_pkg = 200
+    # 申请提现
+    if DEBUG_MODE: print (' require cash now ......')
+    return xunlei_api_require_cash(cookies, wc_pkg)
+
 # 申请提现请求
 def exec_draw_cash(cookies):
     r = get_can_drawcash(cookies)

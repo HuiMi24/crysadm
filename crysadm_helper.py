@@ -215,6 +215,12 @@ def get_online_user_data():
     pool.close()
     pool.join()
 
+# 执行自动提现的函数
+def prc_background_drawcash(cookies):
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'prc_background_drawcash()')
+    xunlei_api_exec_getCash2(cookies=cookies, limits=10)
+
 # 获取离线用户数据
 def get_offline_user_data():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')

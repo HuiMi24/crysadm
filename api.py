@@ -12,6 +12,7 @@ requests.packages.urllib3.disable_warnings()
 server_address = 'http://2-api-red.xunlei.com'
 agent_header = {'user-agent': "RedCrystal/2.0.0 (iPhone; iOS 8.4; Scale/2.00; Android 2.3.7)"}
 
+DEBUG_MODE = False
 # 提交迅雷链接，返回信息
 def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60):
     address = server_address + url

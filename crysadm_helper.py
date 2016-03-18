@@ -292,7 +292,7 @@ def check_collect(cookies):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_collect')
     try:
         mine_info = get_mine_info(cookies)
-        if mine_info.get('r') == 0 and mine_info.get('td_not_in_a') > 16000:
+        if mine_info.get('r') == 0 and mine_info.get('td_not_in_a') > 1000:
             collect(cookies)
     except requests.exceptions.RequestException as e:
         return

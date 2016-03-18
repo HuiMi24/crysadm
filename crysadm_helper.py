@@ -405,7 +405,7 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()
     # 刷新在线用户数据，单位为秒，默认为30秒。
     # 每15秒刷新一次在线用户数据
-    threading.Thread(target=timer, args=(get_online_user_data, 30)).start()
+    threading.Thread(target=timer, args=(get_online_user_data, 15)).start()
     # 刷新离线用户数据，单位为秒，默认为60秒。
     # 每10分钟刷新一次离线用户数据
     threading.Thread(target=timer, args=(get_offline_user_data, 600)).start()

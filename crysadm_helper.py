@@ -86,7 +86,6 @@ def get_data(username):
             account_data['mine_info'] = mine_info
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = get_income_info(cookies)
-            account_data['giftbox_info'] = get_giftbox(cookies)
 
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')

@@ -201,6 +201,11 @@ def dashboard_DoD_income():
 
     key = 'user_data:%s:%s' % (username, (now + timedelta(days=-1)).strftime('%Y-%m-%d'))
     b_yesterday_data_new = r_session.get(key)
+
+    today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
+    yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
+    today_speed_data = today_data.get('speed_stat')
+
     if b_yesterday_data_new is None:
         yesterday_series['data'] = []
     else:
@@ -214,19 +219,15 @@ def dashboard_DoD_income():
                 temp += hourly_produce.get('hourly_list')[i]
             yesterday_series['data'].append(temp)
             yesterday_speed_data = yesterday_data.get('speed_stat')
-
-    today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
-    yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
-    today_speed_data = today_data.get('speed_stat')
+        for i in range(0, 24):
+            if yesterday_speed_data is not None:
+                yesterday_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
+            else:
+                yesterday_speed_series['data'] = []
 
     for i in range(0, 24):
-        if yesterday_speed_data is not None:
-            yesterday_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
-        else:
-            yesterday_speed_series['data'] = []
         if i + now.hour < 24:
             continue
-
         if today_speed_data is not None:
             today_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in today_speed_data))
 

@@ -128,6 +128,8 @@ def user_change_property(field, value):
         user_info['auto_searcht'] = True if value == '1' else False
     if field == 'auto_getaward':
         user_info['auto_getaward'] = True if value == '1' else False
+    if field == 'auto_drawcash':
+        user_info['auto_drawcash'] = True if value == '1' else False
 
     r_session.set(user_key, json.dumps(user_info))
 

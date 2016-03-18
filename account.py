@@ -1,6 +1,4 @@
-#! /usr/bin/env python3.4
-# -*- coding: utf-8 -*-
-# account.py - tool function for xunlei account web GUI
+# 迅雷帐号绑定html页面
 __author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
@@ -34,7 +32,6 @@ def accounts():
 @app.route('/account/add', methods=['POST'])
 @requires_auth
 def account_add():
-    # 获取表单提交的迅雷会员名和帐户密码
     account_name = request.values.get('xl_username')
     password = request.values.get('xl_password')
     md5_password = md5(password)

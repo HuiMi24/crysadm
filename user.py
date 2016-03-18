@@ -45,7 +45,7 @@ def login():
         err_msg = session.get('error_message')
         session['error_message'] = None
 
-    return render_template('index.html', err_msg=err_msg)
+    return render_template('login.html', err_msg=err_msg)
 
 
 @app.route('/invitations')
@@ -120,9 +120,14 @@ def user_change_property(field, value):
 
     if field == 'auto_collect':
         user_info['auto_collect'] = True if value == '1' else False
-
-    if field == 'auto_drawcash':
-        user_info['auto_drawcash'] = True if value == '1' else False
+    if field == 'auto_giftbox':
+        user_info['auto_giftbox'] = True if value == '1' else False
+    if field == 'auto_cashbox':
+        user_info['auto_cashbox'] = True if value == '1' else False
+    if field == 'auto_searcht':
+        user_info['auto_searcht'] = True if value == '1' else False
+    if field == 'auto_getaward':
+        user_info['auto_getaward'] = True if value == '1' else False
 
     r_session.set(user_key, json.dumps(user_info))
 
@@ -171,6 +176,10 @@ def register():
         err_msg = session.get('error_message')
         session['error_message'] = None
 
+    info_msg = None
+    if session.get('info_message') is not None:
+        info_msg = session.get('info_message')
+        session['info_message'] = None
 
     invitation_code = ''
     if request.values.get('inv_code') is not None and len(request.values.get('inv_code')) > 0 :
@@ -179,7 +188,7 @@ def register():
                 not r_session.sismember('public_invitation_codes', invitation_code):
             session['error_message'] = '无效的邀请码。'
 
-    return render_template('register.html', err_msg=err_msg,invitation_code=invitation_code)
+    return render_template('register.html', err_msg=err_msg, info_msg=info_msg, invitation_code=invitation_code)
 
 
 @app.route('/user/register', methods=['POST'])
@@ -218,4 +227,6 @@ def user_register():
                 created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
     r_session.sadd('users', username)
-    return redirect(url_for('login'))
+
+    session['info_message'] = '恭喜你，注册成功.'
+    return redirect(url_for('register'))

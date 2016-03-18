@@ -110,7 +110,7 @@ def get_device_stat(s_type, cookies):
 def get_produce_stat(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(r='mine/produce_stat')
-    return api_post(url=url, data=body, cookies=this_cookies)
+    return api_post(url=server_address, data=body, cookies=this_cookies)
     
 # 提交收集水晶请求
 def collect(cookies):

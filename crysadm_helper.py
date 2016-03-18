@@ -391,21 +391,21 @@ if __name__ == '__main__':
     # 执行收取水晶时间，单位为秒，默认为30秒。
     # 每30分钟检测一次收取水晶
     threading.Thread(target=timer, args=(collect_crystal, 30)).start()
-    # 执行免费宝箱时间，单位为秒，默认为20秒。
+    # 执行免费宝箱时间，单位为秒，默认为300秒。
     # 每20分钟检测一次免费宝箱
-    threading.Thread(target=timer, args=(giftbox_crystal, 20)).start()
+    threading.Thread(target=timer, args=(giftbox_crystal, 60*5)).start()
     # 执行收费宝箱时间，单位为秒，默认为40秒。
     # 每40分钟检测一次收费宝箱
     threading.Thread(target=timer, args=(cashbox_crystal, 40)).start()
     # 执行秘银进攻时间，单位为秒，默认为50秒。
     # 每50分钟检测一次秘银进攻
-    threading.Thread(target=timer, args=(searcht_crystal, 50)).start()
+    threading.Thread(target=timer, args=(searcht_crystal, 50*60)).start()
     # 执行幸运转盘时间，单位为秒，默认为60秒。
     # 每60分钟检测一次幸运转盘
-    threading.Thread(target=timer, args=(getaward_crystal, 60)).start()
-    # 刷新在线用户数据，单位为秒，默认为15秒。
+    threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()
+    # 刷新在线用户数据，单位为秒，默认为30秒。
     # 每15秒刷新一次在线用户数据
-    threading.Thread(target=timer, args=(get_online_user_data, 15)).start()
+    threading.Thread(target=timer, args=(get_online_user_data, 30)).start()
     # 刷新离线用户数据，单位为秒，默认为60秒。
     # 每10分钟刷新一次离线用户数据
     threading.Thread(target=timer, args=(get_offline_user_data, 600)).start()

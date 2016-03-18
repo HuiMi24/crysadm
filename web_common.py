@@ -213,12 +213,11 @@ def dashboard_DoD_income():
             for hourly_produce in yesterday_data.get('produce_stat'):
                 temp += hourly_produce.get('hourly_list')[i]
             yesterday_series['data'].append(temp)
+            yesterday_speed_data = yesterday_data.get('speed_stat')
 
     today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
     yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
-
     today_speed_data = today_data.get('speed_stat')
-    yesterday_speed_data = yesterday_data.get('speed_stat')
 
     for i in range(0, 24):
         if yesterday_speed_data is not None:

@@ -44,7 +44,8 @@ def get_data(username):
 
             mine_info = get_mine_info(cookies)
             if is_api_error(mine_info):
-                print('get_data:', user_id, mine_info, 'error')
+                if DEBUG_MODE:
+                    print('get_data:', user_id, mine_info, 'error')
                 return
 
             if mine_info.get('r') != 0:
@@ -205,7 +206,8 @@ def __relogin(username, password, account_info, account_key):
 
 # 获取在线用户数据
 def get_online_user_data():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'):
         return
 
@@ -223,7 +225,8 @@ def prc_background_drawcash(cookies):
 
 # 获取离线用户数据
 def get_offline_user_data():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'):
         return
 
@@ -251,7 +254,8 @@ def get_offline_user_data():
 
 # 从在线用户列表中清除离线用户
 def clear_offline_user():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'clear_offline_user')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'clear_offline_user')
     for b_username in r_session.smembers('global:online.users'):
         username = b_username.decode('utf-8')
         if not r_session.exists('user:%s:is_online' % username):
@@ -259,7 +263,8 @@ def clear_offline_user():
 
 # 刷新选择自动任务的用户
 def select_auto_task_user():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'select_auto_task_user')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'select_auto_task_user')
     auto_collect_accounts = []
     auto_giftbox_accounts = []
     auto_cashbox_accounts = []
@@ -295,7 +300,8 @@ def select_auto_task_user():
 
 # 执行收取水晶函数
 def check_collect(cookies):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_collect')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_collect')
     try:
         mine_info = get_mine_info(cookies)
         if mine_info.get('r') == 0 and mine_info.get('td_not_in_a') > 1000:
@@ -305,7 +311,8 @@ def check_collect(cookies):
 
 # 执行免费宝箱函数
 def check_giftbox(cookies):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
     try:
         box_info = api_giftbox(cookies)
         if box_info is None: return
@@ -321,7 +328,8 @@ def check_giftbox(cookies):
 
 # 执行收费宝箱函数
 def check_cashbox(cookies):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_cashbox')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_cashbox')
     try:
         box_info = api_giftbox(cookies)
         if box_info is None: return
@@ -336,7 +344,8 @@ def check_cashbox(cookies):
 
 # 执行秘银进攻函数
 def check_searcht(cookies):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
     try:
         r = api_searcht_steal(cookies)
         if r.get('r') != 0:
@@ -352,7 +361,8 @@ def check_searcht(cookies):
 
 # 执行幸运转盘函数
 def check_getaward(cookies):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
     try:
         t = api_getconfig(cookies)
         if t.get('rd') != 'ok':
@@ -368,31 +378,36 @@ def check_getaward(cookies):
 
 # 收取水晶
 def collect_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'collect_crystal')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'collect_crystal')
     for cookie in r_session.smembers('global:auto.collect.cookies'):
         check_collect(json.loads(cookie.decode('utf-8')))
 
 # 免费宝箱
 def giftbox_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'giftbox_crystal')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'giftbox_crystal')
     for cookie in r_session.smembers('global:auto.giftbox.cookies'):
         check_giftbox(json.loads(cookie.decode('utf-8')))
 
 # 收费宝箱
 def cashbox_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'cashbox_crystal')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'cashbox_crystal')
     for cookie in r_session.smembers('global:auto.cashbox.cookies'):
         check_cashbox(json.loads(cookie.decode('utf-8')))
 
 # 秘银进攻
 def searcht_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'searcht_crystal')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'searcht_crystal')
     for cookie in r_session.smembers('global:auto.searcht.cookies'):
         check_searcht(json.loads(cookie.decode('utf-8')))
 
 # 幸运转盘
 def getaward_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
     for cookie in r_session.smembers('global:auto.getaward.cookies'):
         check_getaward(json.loads(cookie.decode('utf-8')))
 

@@ -23,7 +23,8 @@ from api import *
 
 # 获取用户数据
 def get_data(username):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_data')
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_data')
 
     start_time = datetime.now()
     try:
@@ -34,7 +35,8 @@ def get_data(username):
 
             if not account_info.get('active'): continue
 
-            print("start get_data with userID:", user_id)
+            if DEBUG_MODE:            
+                print("start get_data with userID:", user_id)
 
             session_id = account_info.get('session_id')
             user_id = account_info.get('user_id')
@@ -84,6 +86,7 @@ def get_data(username):
             account_data['mine_info'] = mine_info
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = get_income_info(cookies)
+            account_data['giftbox_info'] = get_giftbox(cookies)
 
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
@@ -99,14 +102,15 @@ def get_data(username):
             save_history(username)
 
         r_session.setex('user:%s:cron_queued' % username, '1', 60)
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')
-
+        if DEBUG_MODE:
+            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')        
     except Exception as ex:
         print(username.encode('utf-8'), 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ex)
 
 # 保存历史数据
 def save_history(username):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'save_history')
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'save_history')
     str_today = datetime.now().strftime('%Y-%m-%d')
     key = 'user_data:%s:%s' % (username, str_today)
     b_today_data = r_session.get(key)
@@ -123,6 +127,7 @@ def save_history(username):
     today_data['income'] = 0
     today_data['speed_stat'] = list()
     today_data['pdc_detail'] = []
+    today_data['giftbox_pdc'] = 0
 
     for user_id in r_session.smembers('accounts:%s' % username):
         # 获取账号所有数据
@@ -148,6 +153,7 @@ def save_history(username):
 
         today_data['balance'] += data.get('income').get('r_can_use')
         today_data['income'] += data.get('income').get('r_h_a')
+        today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
@@ -157,7 +163,8 @@ def save_history(username):
 
 # 获取保存的历史数据
 def save_income_history(username, pdc_detail):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'save_income_history')
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'save_income_history')
     now = datetime.now()
     key = 'user_data:%s:%s' % (username, 'income.history')
     b_income_history = r_session.get(key)
@@ -178,7 +185,9 @@ def save_income_history(username, pdc_detail):
 
 # 重新登录
 def __relogin(username, password, account_info, account_key):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
+
     login_result = login(username, password, conf.ENCRYPT_PWD_URL)
 
     if login_result.get('errorCode') != 0:

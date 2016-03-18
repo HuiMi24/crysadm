@@ -13,13 +13,12 @@ def __get_yesterday_pdc(username):
     month_start_date = datetime(year=today.year, month=today.month, day=1).date()
     week_start_date = (today + timedelta(days=-today.weekday())).date()
     begin_date = month_start_date if month_start_date < week_start_date else week_start_date
-    begin_date = begin_date + timedelta(days=-1)
+    #begin_date = begin_date + timedelta(days=-1)
 
     yesterday_m_pdc = 0
     yesterday_w_pdc = 0
 
     while begin_date < today.date():
-        begin_date = begin_date + timedelta(days=1)
 
         key = 'user_data:%s:%s' % (username, begin_date.strftime('%Y-%m-%d'))
 
@@ -32,6 +31,7 @@ def __get_yesterday_pdc(username):
             yesterday_m_pdc += history_data.get('pdc')
         if begin_date >= week_start_date:
             yesterday_w_pdc += history_data.get('pdc')
+        begin_date = begin_date + timedelta(days=1)
 
     return yesterday_m_pdc, yesterday_w_pdc
 
@@ -62,7 +62,8 @@ def dashboard_data():
             'speed_stat': [],
             'yesterday_w_pdc': 0,
             'pdc': 0,
-            'balance': 0
+            'balance': 0,
+            'giftbox_pdc': 0
         }
         return Response(json.dumps(dict(today_data=empty_data)), mimetype='application/json')
 
@@ -104,15 +105,12 @@ def dashboard_speed_share():
             if device_info.get('status') != 'online':
                 continue
             uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)            
-            #downloadspeed = int(int(device_info.get('dcdn_deploy_speed')) / 1024)
-            # total_speed += downloadspeed
             total_speed += uploadspeed            
             device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))            
             # device_speed.append(dict(name=device_info.get('device_name'), value=total_speed))
 
         # 显示在速度分析器圆形图表上的设备ID
         drilldown_data.append(dict(name='矿主ID:' + mid, value=total_speed, drilldown_data=device_speed))
-        #drilldown_data.append(dict(name='设备名:' + device_info.get('device_name'), value=total_speed, drilldown_data=device_speed))
 
     return Response(json.dumps(dict(data=drilldown_data)), mimetype='application/json')
 

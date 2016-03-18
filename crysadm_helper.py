@@ -86,6 +86,7 @@ def get_data(username):
             account_data['mine_info'] = mine_info
             account_data['device_info'] = red_zqb.get('devices')
             account_data['income'] = get_income_info(cookies)
+            account_data['produce_info'] = get_produce_stat(cookies)
 
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
@@ -127,6 +128,7 @@ def save_history(username):
     today_data['speed_stat'] = list()
     today_data['pdc_detail'] = []
     today_data['giftbox_pdc'] = 0
+    today_data['produce_stat'] = [] 
 
     for user_id in r_session.smembers('accounts:%s' % username):
         # 获取账号所有数据
@@ -153,6 +155,7 @@ def save_history(username):
         today_data['balance'] += data.get('income').get('r_can_use')
         today_data['income'] += data.get('income').get('r_h_a')
         today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
+        today_data.get('produce_stat').append(dict(mid=data.get('privilege').get('mid'), hourly_list=data.get('produce_info').get('hourly_list')))
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)

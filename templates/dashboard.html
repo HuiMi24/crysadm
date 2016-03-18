@@ -569,10 +569,15 @@
             }]
         });
 
-
+        var load_hourly_speed_detail = function(){
+            $.getJSON('/dashboard/DoD_income?random='+Math.random(),function(r_data) {
+                $('#DoD-income').highcharts().series[3].setData(r_data.series[3].data);
+            });
+        }
 
         var reload_data = function(){
             load_speed_share();
+            load_hourly_speed_detail();
             $.getJSON( "/dashboard_data?random="+Math.random(), function( data ) {
                 $('#real_time_speed').highcharts().series[0].addPoint([(new Date()).getTime(),data.today_data.last_speed], true, true);
                 if($('#live_speed').html() !== convert_speed(data.today_data.last_speed)){

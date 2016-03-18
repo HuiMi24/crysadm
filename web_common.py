@@ -7,19 +7,21 @@ import json
 import socket
 import struct
 
+import sys
+
 # 获取前一日收益
 def __get_yesterday_pdc(username):
     today = datetime.now()
     month_start_date = datetime(year=today.year, month=today.month, day=1).date()
     week_start_date = (today + timedelta(days=-today.weekday())).date()
     begin_date = month_start_date if month_start_date < week_start_date else week_start_date
-    #begin_date = begin_date + timedelta(days=-1)
+    begin_date = begin_date + timedelta(days=-1)
 
     yesterday_m_pdc = 0
     yesterday_w_pdc = 0
 
     while begin_date < today.date():
-
+        begin_date = begin_date + timedelta(days=1)
         key = 'user_data:%s:%s' % (username, begin_date.strftime('%Y-%m-%d'))
 
         b_data = r_session.get(key)
@@ -31,7 +33,6 @@ def __get_yesterday_pdc(username):
             yesterday_m_pdc += history_data.get('pdc')
         if begin_date >= week_start_date:
             yesterday_w_pdc += history_data.get('pdc')
-        begin_date = begin_date + timedelta(days=1)
 
     return yesterday_m_pdc, yesterday_w_pdc
 
@@ -240,7 +241,8 @@ def dashboard_DoD_income():
     if dod_income_value > 0:
         expected_income = str(int((yesterday_last_value / dod_income_value) * now_income_value))
 
-    dod_income_value += int((yesterday_series['data'][now.hour]) / 60 * now.minute)
+    if len(yesterday_series['data']) != 0:
+        dod_income_value += int((yesterday_series['data'][now.hour]) / 60 * now.minute)
     return Response(json.dumps(dict(series=[yesterday_series, today_series, yesterday_speed_series, today_speed_series],
                                     data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value,
                                               expected_income=expected_income)

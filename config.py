@@ -19,8 +19,8 @@ class Config(object):
     REDIS_CONF = RedisConfig(host='127.0.0.1', port=6379, db=0)
     PASSWORD_PREFIX = "4kSjyQUD-rhTQ-qPkm-OvnJ-jedEdMOiONNa"
     ENCRYPT_PWD_URL = None
-    SERVER_IP = '127.0.0.1'
-    SERVER_PORT = 5000
+    SERVER_IP = '0.0.0.0'
+    SERVER_PORT = 4000
 
 
 class ProductionConfig(Config):

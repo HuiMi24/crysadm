@@ -583,20 +583,20 @@
                 if($('#live_speed').html() !== convert_speed(data.today_data.last_speed)){
                     $('#live_speed').html(convert_speed(data.today_data.last_speed));
 
-                    if(data.today_data.last_speed > 1024){
-                        $('#speed_unit').html('M')
-                    }else{
+                    if(data.today_data.last_speed < 1024){
                         $('#speed_unit').html('K')
+                    }else{
+                        $('#speed_unit').html('M')
                     }
                     flash_element($('#live_speed'));
                 }
                 if($('#down_speed').html() !== convert_speed(data.today_data.deploy_speed)){
                     $('#down_speed').html(convert_speed(data.today_data.deploy_speed));
 
-                    if(data.today_data.deploy_speed > 1024){
-                        $('#speed2_unit').html('M')
-                    }else{
+                    if(data.today_data.deploy_speed < 1024){
                         $('#speed2_unit').html('K')
+                    }else{
+                        $('#speed2_unit').html('M')
                     }
                     flash_element($('#down_speed'));
                 }

@@ -45,7 +45,7 @@ def login():
         err_msg = session.get('error_message')
         session['error_message'] = None
 
-    return render_template('login.html', err_msg=err_msg)
+    return render_template('index.html', err_msg=err_msg)
 
 
 @app.route('/invitations')

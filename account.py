@@ -32,6 +32,7 @@ def accounts():
 @app.route('/account/add', methods=['POST'])
 @requires_auth
 def account_add():
+    # 获取表单提交的迅雷会员名和帐户密码
     account_name = request.values.get('xl_username')
     password = request.values.get('xl_password')
     md5_password = md5(password)

@@ -213,7 +213,7 @@ def dashboard_DoD_income():
         yesterday_data = json.loads(b_yesterday_data_new.decode('utf-8'))
         yesterday_series['data'] = []
         for i in range(1, 25):
-            if yesterday_data.get('produce_stat').get('produce_stat') is None:
+            if yesterday_data.get('produce_stat')[0].get('hourly_list') is None:
                 break
             temp = 0
             for hourly_produce in yesterday_data.get('produce_stat'):

@@ -211,7 +211,7 @@ def get_online_user_data():
     if r_session.exists('api_error_info'):
         return
 
-    pool = ThreadPool(processes=5)
+    pool = ThreadPool(processes=1)
 
     pool.map(get_data, (u.decode('utf-8') for u in r_session.smembers('global:online.users')))
     pool.close()
@@ -422,13 +422,13 @@ if __name__ == '__main__':
     # 如有任何疑问及Bug欢迎加入L.k群讨论
     # 执行收取水晶时间，单位为秒，默认为30秒。
     # 每30分钟检测一次收取水晶
-    threading.Thread(target=timer, args=(collect_crystal, 30)).start()
+    threading.Thread(target=timer, args=(collect_crystal, 60*10)).start()
     # 执行免费宝箱时间，单位为秒，默认为300秒。
     # 每20分钟检测一次免费宝箱
-    threading.Thread(target=timer, args=(giftbox_crystal, 60*5)).start()
+    threading.Thread(target=timer, args=(giftbox_crystal, 60*10)).start()
     # 执行收费宝箱时间，单位为秒，默认为40秒。
     # 每40分钟检测一次收费宝箱
-    threading.Thread(target=timer, args=(cashbox_crystal, 40)).start()
+    threading.Thread(target=timer, args=(cashbox_crystal, 40*60)).start()
     # 执行秘银进攻时间，单位为秒，默认为50秒。
     # 每50分钟检测一次秘银进攻
     threading.Thread(target=timer, args=(searcht_crystal, 50*60)).start()
@@ -437,14 +437,14 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()
     # 刷新在线用户数据，单位为秒，默认为30秒。
     # 每15秒刷新一次在线用户数据
-    threading.Thread(target=timer, args=(get_online_user_data, 15)).start()
+    threading.Thread(target=timer, args=(get_online_user_data, 30)).start()
     # 刷新离线用户数据，单位为秒，默认为60秒。
     # 每10分钟刷新一次离线用户数据
     threading.Thread(target=timer, args=(get_offline_user_data, 600)).start()
     # 从在线用户列表中清除离线用户，单位为秒，默认为60秒。
     # 每分钟检测离线用户
-    threading.Thread(target=timer, args=(clear_offline_user, 60)).start()
+    threading.Thread(target=timer, args=(clear_offline_user, 60*10)).start()
     # 刷新选择自动任务的用户，单位为秒，默认为10分钟
-    threading.Thread(target=timer, args=(select_auto_task_user, 60)).start()
+    threading.Thread(target=timer, args=(select_auto_task_user, 60*10)).start()
     while True:
         time.sleep(1)

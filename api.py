@@ -10,7 +10,7 @@ requests.packages.urllib3.disable_warnings()
 
 # 迅雷API接口
 server_address = 'http://2-api-red.xunlei.com'
-agent_header = {'user-agent': "RedCrystal/2.0.0 (iPhone; iOS 8.4; Scale/2.00; Android 2.3.7)"}
+agent_header = {'user-agent': "RedCrystal/2.0.0 (Android 4.1)"}
 
 DEBUG_MODE = False
 # 提交迅雷链接，返回信息

@@ -9,7 +9,7 @@ from util import md5
 from base64 import b64encode
 from urllib.parse import unquote, urlencode
 
-# ×Ö·û´®×ªÕûÊý
+
 def StrToInt(str):
     """ StrToInt - conver String to Integer """
     bigInteger = 0

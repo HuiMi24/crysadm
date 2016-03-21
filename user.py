@@ -45,7 +45,7 @@ def login():
         err_msg = session.get('error_message')
         session['error_message'] = None
 
-    return render_template('index.html', err_msg=err_msg)
+    return render_template('login.html', err_msg=err_msg)
 
 
 @app.route('/invitations')
@@ -120,16 +120,14 @@ def user_change_property(field, value):
 
     if field == 'auto_collect':
         user_info['auto_collect'] = True if value == '1' else False
+    if field == 'auto_drawcash':
+        user_info['auto_drawcash'] = True if value == '1' else False
     if field == 'auto_giftbox':
         user_info['auto_giftbox'] = True if value == '1' else False
-    if field == 'auto_cashbox':
-        user_info['auto_cashbox'] = True if value == '1' else False
     if field == 'auto_searcht':
         user_info['auto_searcht'] = True if value == '1' else False
     if field == 'auto_getaward':
         user_info['auto_getaward'] = True if value == '1' else False
-    if field == 'auto_drawcash':
-        user_info['auto_drawcash'] = True if value == '1' else False
 
     r_session.set(user_key, json.dumps(user_info))
 
@@ -225,7 +223,7 @@ def user_register():
     r_session.srem('public_invitation_codes', invitation_code)
 
     user = dict(username=username, password=hash_password(password), id=str(uuid.uuid1()),
-                active=True, is_admin=False, max_account_no=5,
+                active=True, is_admin=False, max_account_no=20,
                 created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
     r_session.sadd('users', username)

@@ -9,8 +9,9 @@ from urllib.parse import urlparse, parse_qs
 requests.packages.urllib3.disable_warnings()
 
 # 迅雷API接口
+appversion = '3.1.1'
 server_address = 'http://2-api-red.xunlei.com'
-agent_header = {'user-agent': "RedCrystal/2.0.0 (Android 4.1)"}
+agent_header = {'user-agent': "RedCrystal/3.0.0 (Android 4.1)"}
 
 DEBUG_MODE = False
 # 提交迅雷链接，返回信息
@@ -80,7 +81,7 @@ def get_income_info(cookies):
 # 获取MINE信息
 def get_mine_info(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
-    body = dict(hand='0', v='2', ver='1')
+    body = dict(v='4', appversion=appversion)
     return api_post(url='/?r=mine/info', data=body, cookies=cookies)
 
 # 获取速度状态

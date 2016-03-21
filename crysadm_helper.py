@@ -403,17 +403,17 @@ def timer(func, seconds):
 
 if __name__ == '__main__':
     # 执行收取水晶时间，单位为秒，默认为30秒。
-    # 每10分钟检测一次收取水晶
-    threading.Thread(target=timer, args=(collect_crystal, 60*10)).start()
-    # 执行免费宝箱时间，单位为秒，默认为300秒。
-    # 每10分钟检测一次免费宝箱
-    threading.Thread(target=timer, args=(giftbox_crystal, 60*10)).start()
-    # 执行收费宝箱时间，单位为秒，默认为40秒。
-    # 每40分钟检测一次收费宝箱
-    threading.Thread(target=timer, args=(cashbox_crystal, 40*60)).start()
-    # 执行秘银进攻时间，单位为秒，默认为50秒。
-    # 每50分钟检测一次秘银进攻
-    threading.Thread(target=timer, args=(searcht_crystal, 50*60)).start()
+    # 每30分钟检测一次收取水晶
+    threading.Thread(target=timer, args=(collect_crystal, 60*30)).start()
+    # 执行自动提现时间，单位为秒，默认为60秒。
+    # 每60分钟检测一次自动提现
+    threading.Thread(target=timer, args=(drawcash_crystal, 60*60)).start()
+    # 执行免费宝箱时间，单位为秒，默认为40秒。
+    # 每40分钟检测一次免费宝箱
+    threading.Thread(target=timer, args=(giftbox_crystal, 60*40)).start()
+    # 执行秘银进攻时间，单位为秒，默认为240秒。
+    # 每240分钟检测一次秘银进攻
+    threading.Thread(target=timer, args=(searcht_crystal, 60*60*4)).start()
     # 执行幸运转盘时间，单位为秒，默认为60秒。
     # 每60分钟检测一次幸运转盘
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()

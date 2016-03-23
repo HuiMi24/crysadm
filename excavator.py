@@ -8,6 +8,7 @@ import requests
 from urllib.parse import urlparse, parse_qs, unquote
 import time
 from api import ubus_cd, collect, exec_draw_cash, api_searcht_steal, api_searcht_collect, api_summary_steal, api_getaward
+import re
 
 # 加载矿机主页面
 @app.route('/excavators')
@@ -125,9 +126,21 @@ def getaward_id(user_id):
     account_data_key = account_key + ':data'
     account_data_value = json.loads(r_session.get(account_data_key).decode("utf-8"))
     account_data_value.get('mine_info')['td_not_in_a'] = 0
+    #check_award_income(r, account_data_value)
     r_session.set(account_data_key, json.dumps(account_data_value))
 
     return redirect(url_for('excavators'))
+
+def check_award_income(r, account_data_value):
+    crystal_pattern = re.compile('.*>([0-9]+)<.*水晶.*')
+    crystal_match = crystal_pattern.match(unquote(r.get('tip')))
+    if account_data_value.get('award_income') is None:
+        account_data_value['award_income'] = 0
+    if crystal_match:
+        print("DEBUG=====", crystal_match.group(1))
+        account_data_value['award_income'] += crystal_match.group(1)
+    print("DEBUG=====", unquote(r.get('tip')))
+    sys.stdout.flush()
 
 # 幸运转盘[all]
 @app.route('/getaward/all', methods=['POST'])
@@ -155,6 +168,7 @@ def getaward_all():
             account_data_key = account_key + ':data'
             account_data_value = json.loads(r_session.get(account_data_key).decode("utf-8"))
             account_data_value.get('mine_info')['td_not_in_a'] = 0
+            #check_award_income(r, account_data_value)
             r_session.set(account_data_key, json.dumps(account_data_value))
     if len(success_message) > 0:
         session['info_message'] = success_message

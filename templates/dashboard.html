@@ -95,6 +95,23 @@
                 </div>
             </div>
         </div> 
+
+        <!--div class="col-lg-3 col-md-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
+                    <h5>转盘收益</h5>
+                </div>
+                <div class="ibox-content" style="height: 88px;">
+
+                    <div class="row">
+                        <div class="col-xs-12 text-right" style="padding-left: 5px;">
+                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="award_income"></h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div --> 
       
         <div class="col-lg-3 col-md-6">
             <div class="ibox float-e-margins">
@@ -616,6 +633,11 @@
                     $('#giftbox_pdc').html(convert_to_yuan(data.today_data.giftbox_pdc));
                     flash_element($('#giftbox_pdc'));
                 }
+                //if($('#award_income').html() !== convert_to_yuan(data.today_data.award_income)) {
+                //    $('#award_income').html(convert_to_yuan(data.today_data.award_income));
+                //    flash_element($('#award_income'));
+                //}
+
             })
         }
 

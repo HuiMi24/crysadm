@@ -281,15 +281,20 @@ def select_auto_task_user():
             if user_info.get('auto_searcht'): auto_searcht_accounts.append(cookies)
             if user_info.get('auto_getaward'): auto_getaward_accounts.append(cookies)
     r_session.delete('global:auto.collect.cookies')
-    r_session.sadd('global:auto.collect.cookies', *auto_collect_accounts)
+    if len(auto_collect_accounts) != 0:
+        r_session.sadd('global:auto.collect.cookies', *auto_collect_accounts)
     r_session.delete('global:auto.drawcash.cookies')
-    r_session.sadd('global:auto.drawcash.cookies', *auto_drawcash_accounts)
+    if len(auto_drawcash_accounts) != 0:
+        r_session.sadd('global:auto.drawcash.cookies', *auto_drawcash_accounts)
     r_session.delete('global:auto.giftbox.cookies')
-    r_session.sadd('global:auto.giftbox.cookies', *auto_giftbox_accounts)
+    if len(auto_giftbox_accounts) != 0:
+        r_session.sadd('global:auto.giftbox.cookies', *auto_giftbox_accounts)
     r_session.delete('global:auto.searcht.cookies')
-    r_session.sadd('global:auto.searcht.cookies', *auto_searcht_accounts)
+    if len(auto_searcht_accounts) != 0:
+        r_session.sadd('global:auto.searcht.cookies', *auto_searcht_accounts)
     r_session.delete('global:auto.getaward.cookies')
-    r_session.sadd('global:auto.getaward.cookies', *auto_getaward_accounts)
+    if len(auto_getaward_accounts) != 0:
+        r_session.sadd('global:auto.getaward.cookies', *auto_getaward_accounts)
 
 # 执行收取水晶函数
 def check_collect(cookies):

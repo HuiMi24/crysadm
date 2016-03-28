@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
+import random
 
 conf = None
 if socket.gethostname() == 'GXMBP.local':
@@ -412,13 +413,13 @@ def timer(func, seconds):
 if __name__ == '__main__':
     # 执行收取水晶时间，单位为秒，默认为30秒。
     # 每30分钟检测一次收取水晶
-    threading.Thread(target=timer, args=(collect_crystal, 60*30)).start()
+    threading.Thread(target=timer, args=(collect_crystal, random.randint(60*20, 60*30))).start()
     # 执行自动提现时间，单位为秒，默认为60秒。
     # 每60分钟检测一次自动提现
     threading.Thread(target=timer, args=(drawcash_crystal, 60*60)).start()
     # 执行免费宝箱时间，单位为秒，默认为40秒。
     # 每40分钟检测一次免费宝箱
-    threading.Thread(target=timer, args=(giftbox_crystal, 60*40)).start()
+    threading.Thread(target=timer, args=(giftbox_crystal, random.randint(60*20, 60*40))).start()
     # 执行秘银进攻时间，单位为秒，默认为240秒。
     # 每240分钟检测一次秘银进攻
     threading.Thread(target=timer, args=(searcht_crystal, 60*60*4)).start()
@@ -427,7 +428,7 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()
     # 刷新在线用户数据，单位为秒，默认为30秒。
     # 每30秒刷新一次在线用户数据
-    threading.Thread(target=timer, args=(get_online_user_data, 30)).start()
+    threading.Thread(target=timer, args=(get_online_user_data, random.randint(30, 60))).start()
     # 刷新离线用户数据，单位为秒，默认为60秒。
     # 每10分钟刷新一次离线用户数据
     threading.Thread(target=timer, args=(get_offline_user_data, 600)).start()

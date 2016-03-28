@@ -85,9 +85,9 @@ def get_mine_info(cookies):
     return api_post(url='/?r=mine/info', data=body, cookies=cookies)
 
 # 获取速度状态
-def get_speed_stat(s_type, cookies):
+def get_speed_stat(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
-    body = dict(type=s_type, hand='0', v='0', ver='1')
+    body = dict(type='1', hand='0', v='0', ver='1')
     try:
         r = requests.post(server_address + '/?r=mine/speed_stat', data=body, verify=False, cookies=cookies, headers=agent_header, timeout=60)
     except requests.exceptions.RequestException as e:

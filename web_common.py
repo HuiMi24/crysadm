@@ -40,7 +40,13 @@ def __get_yesterday_pdc(username):
 @app.route('/dashboard')
 @requires_auth
 def dashboard():
-    return render_template('dashboard.html')
+    user = session.get('user_info')
+    username = user.get('username')
+    user_key = 'user:%s' % username
+
+    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
+
+    return render_template('dashboard.html', user_info=user_info)
 
 # 刷新控制面板数据
 @app.route('/dashboard_data')
@@ -173,6 +179,116 @@ def dashboard_today_income_share():
 @app.route('/dashboard/DoD_income')
 @requires_auth
 def dashboard_DoD_income():
+    user = session.get('user_info')
+    username = user.get('username')
+    user_key = 'user:%s' % username
+
+    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
+    if user_info.get('auto_column') != True:
+        ls = dashboard_DoD_income_1()
+    else:
+        ls = dashboard_DoD_income_2()
+
+    return ls
+
+# 默认统计
+def dashboard_DoD_income_1():
+    user = session.get('user_info')
+    username = user.get('username')
+
+    key = 'user_data:%s:%s' % (username, 'income.history')
+
+    b_income_history = r_session.get(key)
+    if b_income_history is None:
+        return Response(json.dumps(dict(data=[])), mimetype='application/json')
+
+    income_history = json.loads(b_income_history.decode('utf-8'))
+
+    today_series = dict(name='今日', data=[], pointPadding=0.2, pointPlacement=0, color='#676A6C')
+    yesterday_series = dict(name='昨日', data=[], pointPadding=-0.1, pointPlacement=0, color='#1AB394')
+
+    now = datetime.now()
+    today_data = income_history.get(now.strftime('%Y-%m-%d'))
+    yesterday_data = income_history.get((now + timedelta(days=-1)).strftime('%Y-%m-%d'))
+
+    key = 'user_data:%s:%s' % (username, now.strftime('%Y-%m-%d'))
+    b_today_user_data = r_session.get(key)
+    b_today_user_data = json.loads(b_today_user_data.decode('utf-8'))
+    if b_today_user_data is None:
+        return Response(json.dumps(dict(data=[])), mimetype='application/json')
+
+    key = 'user_data:%s:%s' % (username, (now + timedelta(days=-1)).strftime('%Y-%m-%d'))
+    b_yesterday_user_data = r_session.get(key)
+    b_yesterday_user_data = json.loads(b_yesterday_user_data.decode('utf-8'))
+    if b_yesterday_user_data is None:
+        return Response(json.dumps(dict(data=[])), mimetype='application/json')
+
+    today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
+    yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
+
+    today_speed_data = b_today_user_data.get('speed_stat')
+    yesterday_speed_data = b_yesterday_user_data.get('speed_stat')
+
+    for i in range(0, 24):
+        if yesterday_speed_data is not None:
+            yesterday_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
+        if i + now.hour < 24:
+            continue
+
+        if today_speed_data is not None:
+            today_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in today_speed_data))
+
+    yesterday_last_value = 0
+    today_data_last_value = 0
+    for i in range(0, 24):
+        hour = '%02d' % i
+        yesterday_value = 0
+        today_data_value = 0
+        yesterday_next_value = 0
+        if yesterday_data is not None:
+            next_data = yesterday_data.get('%02d' % (i + 1))
+            if yesterday_data.get('%02d' % (i + 1)) is not None:
+                yesterday_next_value = sum(row['pdc'] for row in next_data)
+            if yesterday_data.get(hour) is not None:
+                yesterday_value = sum(row['pdc'] for row in yesterday_data.get(hour))
+            else:
+                if yesterday_next_value != 0:
+                    yesterday_value = int((yesterday_next_value - yesterday_last_value) / 2) + \
+                                      yesterday_last_value
+                else:
+                    yesterday_value = yesterday_last_value
+
+        yesterday_series['data'].append(yesterday_value - yesterday_last_value)
+        yesterday_last_value = yesterday_value
+
+        if i >= now.hour:
+            continue
+
+        if today_data is not None and today_data.get(hour) is not None:
+            today_data_value = sum(row['pdc'] for row in today_data.get(hour))
+
+        if today_data_value != 0:
+            today_series['data'].append(today_data_value - today_data_last_value)
+
+            today_data_last_value = today_data_value
+        else:
+            today_series['data'].append(0)
+
+    now_income_value = sum(today_series['data'][0:now.hour])
+    dod_income_value = sum(yesterday_series['data'][0:now.hour])
+
+    expected_income = '-'
+    if dod_income_value > 0:
+        expected_income = str(int((yesterday_last_value / dod_income_value) * now_income_value))
+
+    dod_income_value += int((yesterday_series['data'][now.hour]) / 60 * now.minute)
+    return Response(json.dumps(dict(series=[yesterday_series, today_series, yesterday_speed_series, today_speed_series],
+                                    data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value,
+                                              expected_income=expected_income)
+                                    )), mimetype='application/json')
+
+# 迅雷统计
+def dashboard_DoD_income_2():
     user = session.get('user_info')
     username = user.get('username')
 

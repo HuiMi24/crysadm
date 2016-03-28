@@ -78,11 +78,9 @@ def get_data(username):
             if account_data.get('updated_time') is not None:
                 last_updated_time = datetime.strptime(account_data.get('updated_time'), '%Y-%m-%d %H:%M:%S')
                 if last_updated_time.hour != datetime.now().hour:
-                    account_data['zqb_speed_stat'] = get_speed_stat('1', cookies)
-                    account_data['old_speed_stat'] = get_speed_stat('0', cookies)
+                    account_data['zqb_speed_stat'] = get_speed_stat(cookies)
             else:
-                account_data['zqb_speed_stat'] = get_speed_stat('1', cookies)
-                account_data['old_speed_stat'] = get_speed_stat('0', cookies)
+                account_data['zqb_speed_stat'] = get_speed_stat(cookies)
 
             account_data['updated_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             account_data['mine_info'] = mine_info
@@ -146,9 +144,7 @@ def save_history(username):
             continue
         today_data.get('speed_stat').append(dict(mid=data.get('privilege').get('mid'),
                                                  dev_speed=data.get('zqb_speed_stat') if data.get(
-                                                     'zqb_speed_stat') is not None else [0] * 24,
-                                                 pc_speed=data.get('old_speed_stat') if data.get(
-                                                     'old_speed_stat') is not None else [0] * 24))
+                                                     'zqb_speed_stat') is not None else [0] * 24))
         this_pdc = data.get('mine_info').get('dev_m').get('pdc')
 
         today_data['pdc'] += this_pdc
@@ -304,62 +300,74 @@ def select_auto_task_user():
 def check_collect(cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_collect')
-    try:
+    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.smembers('users')]):
+        user_info = json.loads(b_user.decode('utf-8'))
+        if not user_info.get('active'): continue
         mine_info = get_mine_info(cookies)
-        if mine_info.get('r') == 0 and mine_info.get('td_not_in_a') > 1000:
+        time.sleep(2)
+        if mine_info.get('r') != 0: return
+        if user_info.get('auto_collect_info') is None:
+            l = 10000
+        else:
+            l = user_info.get('auto_collect_info')
+        if mine_info.get('td_not_in_a') > l:
             collect(cookies)
-    except requests.exceptions.RequestException as e:
-        return
+        time.sleep(3)
 
 # 执行自动提现的函数
 def check_drawcash(cookies):
     if DEBUG_MODE:
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_drawcash')
-    try:
-        exec_draw_cash(cookies=cookies, limits=10)
-    except Exception as e:
-        return
+    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.smembers('users')]):
+        user_info = json.loads(b_user.decode('utf-8'))
+        if not user_info.get('active'): continue
+        if user_info.get('auto_drawcash_info') is None:
+            l = 10
+        else:
+            l = user_info.get('auto_drawcash_info')
+        exec_draw_cash(cookies=cookies, limits=l)
+        time.sleep(3)
 
 # 执行免费宝箱函数
 def check_giftbox(cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
-    try:
-        box_info = api_giftbox(cookies)
-        if box_info is None: return
-        for box in box_info:
-            if box.get('cnum') == 0:
-                api_openStone(cookies=cookies, giftbox_id=box.get('id'), direction='3')
-            else:
-                api_giveUpGift(cookies=cookies, giftbox_id=box.get('id'))
-    except Exception as e:
-        return
+    box_info = api_giftbox(cookies)
+    time.sleep(2)
+    if box_info.get('r') != 0: return
+    for box in box_info.get('ci'):
+        if box.get('cnum') == 0:
+            api_openStone(cookies=cookies, giftbox_id=box.get('id'), direction='3')
+        else:
+            api_giveUpGift(cookies=cookies, giftbox_id=box.get('id'))
+    time.sleep(3)
 
 # 执行秘银进攻函数
 def check_searcht(cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
-    try:
-        r = api_searcht_steal(cookies)
-        if r.get('r') == 0:
-            time.sleep(2)
-            api_searcht_collect(cookies=cookies, searcht_id=r.get('sid'))
+    t = api_sys_getEntry(cookies)
+    time.sleep(2)
+    if t.get('r') != 0: return
+    if t.get('steal_free') > 0:
+        steal_info = api_steal_search(cookies)
+        if steal_info.get('r') == 0:
+            time.sleep(3)
+            api_steal_collect(cookies=cookies, searcht_id=steal_info.get('sid'))
             time.sleep(1)
-            api_summary_steal(cookies=cookies, searcht_id=r.get('sid'))
-    except Exception as e:
-        return
+            api_steal_summary(cookies=cookies, searcht_id=steal_info.get('sid'))
+    time.sleep(3)
 
 # 执行幸运转盘函数
 def check_getaward(cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
-    try:
-        r = api_getconfig(cookies)
-        if r.get('rd') == 'ok':
-            if r.get('cost') == 5000:
-                api_getaward(cookies)
-    except Exception as e:
-        return
+    r = api_getconfig(cookies)
+    if r.get('rd') == 'ok':
+        if r.get('cost') == 5000:
+            time.sleep(2)
+            api_getaward(cookies)
+    time.sleep(3)
 
 # 收取水晶
 def collect_crystal():
@@ -372,12 +380,8 @@ def collect_crystal():
 def drawcash_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'drawcash_crystal')   
     time_now = datetime.now()
-    if int(time_now.isoweekday()) != 2:        
-        return dict(r='0', rd='提现开放时间为每周二11:00-18:00(国家法定节假日除外)')
-
-    time_hour = time_now.hour
-    if int(time_hour) < 11 or int(time_hour) > 18: 
-        return dict(r='0', rd='提现开放时间为每周二11:00-18:00(国家法定节假日除外)')
+    if int(time_now.isoweekday()) != 2: return
+    if int(time_now.hour) < 11 or int(time_now.hour) > 18: return
 
     for cookie in r_session.smembers('global:auto.drawcash.cookies'):
         check_drawcash(json.loads(cookie.decode('utf-8')))

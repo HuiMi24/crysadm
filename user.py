@@ -138,10 +138,11 @@ def user_change_property(field, value):
         n_password = request.values.get('new_password')
         if not n_password:
             n_password = 10000
-        if int(n_password) > 10000:
-            user_info['auto_collect_info'] = n_password
-        else:
-            user_info['auto_collect_info'] = 10000
+        user_info['auto_collect_info'] = n_password
+        #if int(n_password) > 10000:
+        #    user_info['auto_collect_info'] = n_password
+        #else:
+        #    user_info['auto_collect_info'] = 10000
     if field == 'auto_drawcash_info':
         n_password = request.values.get('new_password')
         if not n_password:

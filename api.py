@@ -197,6 +197,12 @@ def ubus_cd(session_id, account_id, action, out_params, url_param=None):
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
 
+def check_award_income(r):
+    #crystal_pattern = re.compile('.*>([0-9]+)<.*水晶.*')
+    #crystal_match = crystal_pattern.match(r)
+    #return int(crystal_match.group(1))
+    return 500
+
 # 发送设置链接
 def parse_setting_url(url):
     query_s = parse_qs(urlparse(url).query, keep_blank_values=True)

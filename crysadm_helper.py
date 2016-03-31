@@ -129,7 +129,7 @@ def save_history(username):
     today_data['pdc_detail'] = []
     today_data['giftbox_pdc'] = 0
     today_data['produce_stat'] = [] 
-    #today_data['award_income'] = 0
+    today_data['award_income'] = 0
 
     for user_id in r_session.smembers('accounts:%s' % username):
         # 获取账号所有数据
@@ -307,9 +307,9 @@ def check_collect(cookies):
         time.sleep(2)
         if mine_info.get('r') != 0: return
         if user_info.get('auto_collect_info') is None:
-            l = 1000
+            l = 999
         else:
-            l = user_info.get('auto_collect_info')
+            l = int(user_info.get('auto_collect_info'))
         if mine_info.get('td_not_in_a') > l:
             collect(cookies)
         time.sleep(3)

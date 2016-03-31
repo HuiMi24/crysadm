@@ -96,7 +96,7 @@
             </div>
         </div> 
 
-        <!--div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
@@ -111,7 +111,7 @@
                     </div>
                 </div>
             </div>
-        </div --> 
+        </div > 
       
         <div class="col-lg-3 col-md-6">
             <div class="ibox float-e-margins">
@@ -637,10 +637,10 @@
                     $('#giftbox_pdc').html(convert_to_yuan(data.today_data.giftbox_pdc));
                     flash_element($('#giftbox_pdc'));
                 }
-                //if($('#award_income').html() !== convert_to_yuan(data.today_data.award_income)) {
-                //    $('#award_income').html(convert_to_yuan(data.today_data.award_income));
-                //    flash_element($('#award_income'));
-                //}
+                if($('#award_income').html() !== convert_to_yuan(data.today_data.award_income)) {
+                    $('#award_income').html(convert_to_yuan(data.today_data.award_income));
+                    flash_element($('#award_income'));
+                }
 
             })
         }

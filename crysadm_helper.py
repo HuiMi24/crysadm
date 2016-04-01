@@ -158,6 +158,11 @@ def save_history(username):
         if data.get('award_income') is not None:
             today_data['award_income'] += data.get('award_income')
         today_data['pdc'] += today_data['award_income'] 
+        now = datetime.now()
+        if(now.hour == 23 and now.minute >= 58 ) :
+            data['award_income'] = 0
+            r_session.set(account_data_key, json.dumps(data))
+            red_log("test", '自动执行', 'reset award_income', "to 0")
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
@@ -305,7 +310,7 @@ def check_collect(user, cookies):
     mine_info = get_mine_info(cookies)
     time.sleep(2)
     if mine_info.get('r') != 0: return
-    if mine_info.get('td_not_in_a') > 16000:
+    if mine_info.get('td_not_in_a') > 1000:
         r = collect(cookies)
         if r.get('rd') != 'ok':
             log = '%s' % r.get('rd')

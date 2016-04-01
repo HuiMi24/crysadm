@@ -5,6 +5,7 @@ from crysadm_helper import r_session
 from requests.adapters import HTTPAdapter
 import time
 from urllib.parse import urlparse, parse_qs
+import re, sys
 
 requests.packages.urllib3.disable_warnings()
 
@@ -13,7 +14,7 @@ appversion = '3.1.1'
 server_address = 'http://2-api-red.xunlei.com'
 agent_header = {'user-agent': "RedCrystal/3.0.0 (Android 4.1)"}
 
-DEBUG_MODE = False
+DEBUG_MODE = True 
 # 提交迅雷链接，返回信息
 def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60):
     address = server_address + url
@@ -198,10 +199,21 @@ def ubus_cd(session_id, account_id, action, out_params, url_param=None):
         return __handle_exception(e=e)
 
 def check_award_income(r):
-    #crystal_pattern = re.compile('.*>([0-9]+)<.*水晶.*')
-    #crystal_match = crystal_pattern.match(r)
-    #return int(crystal_match.group(1))
-    return 500
+    print("DEBUG=== 202", r)
+    sys.stdout.flush()
+    crystal_pattern = re.compile('.*>([0-9]+)<.*水晶.*')
+    print("DEBUG=== 205", crystal_pattern)
+    sys.stdout.flush()
+    crystal_match = crystal_pattern.match(r)
+    print("DEBUG=== 208", crystal_match)
+    sys.stdout.flush()
+    if crystal_match:
+        print("DEBUG=== 211")
+        sys.stdout.flush()
+        print("DEBUG===", crystal_match.group(1))
+        sys.stdout.flush()
+        return int(crystal_match.group(1))
+    return 0
 
 # 发送设置链接
 def parse_setting_url(url):

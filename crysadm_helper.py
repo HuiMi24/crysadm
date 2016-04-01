@@ -7,6 +7,7 @@ from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import random
+from urllib.parse import urlparse, parse_qs, unquote
 
 conf = None
 if socket.gethostname() == 'GXMBP.local':
@@ -154,8 +155,9 @@ def save_history(username):
         today_data['income'] += data.get('income').get('r_h_a')
         today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
         today_data.get('produce_stat').append(dict(mid=data.get('privilege').get('mid'), hourly_list=data.get('produce_info').get('hourly_list')))
-        #if data.get('award_income') is not None:
-        #    today_data['award_income'] += data.get('award_income')
+        if data.get('award_income') is not None:
+            today_data['award_income'] += data.get('award_income')
+        today_data['pdc'] += today_data['award_income'] 
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
@@ -366,8 +368,9 @@ def check_getaward(cookies):
     if r.get('rd') == 'ok':
         if r.get('cost') == 5000:
             time.sleep(2)
-            api_getaward(cookies)
+            r = api_getaward(cookies)
     time.sleep(3)
+    return r
 
 # 收取水晶
 def collect_crystal():
@@ -404,8 +407,43 @@ def searcht_crystal():
 def getaward_crystal():
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
-    for cookie in r_session.smembers('global:auto.getaward.cookies'):
-        check_getaward(json.loads(cookie.decode('utf-8')))
+    str_today = datetime.now().strftime('%Y-%m-%d')
+    for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.smembers('users')]):
+        user_info = json.loads(b_user.decode('utf-8'))
+        if not user_info.get('active'): continue
+        username = user_info.get('username')
+        account_keys = ['account:%s:%s' % (username, user_id.decode('utf-8')) for user_id in r_session.smembers('accounts:%s' % username)]
+        key = 'user_data:%s:%s' % (username, str_today)
+        b_today_data = r_session.get(key)
+        if b_today_data is not None:
+            today_data = json.loads(b_today_data.decode('utf-8'))
+        if len(account_keys) == 0: continue
+        for b_account in r_session.mget(*account_keys):
+            account_info = json.loads(b_account.decode('utf-8'))
+            if not (account_info.get('active')): continue
+            user_id = account_info.get('user_id')
+            for cookie in r_session.smembers('global:auto.getaward.cookies'):
+                r = check_getaward(json.loads(cookie.decode('utf-8')))
+                if r.get('rd') != 'ok':
+                    continue
+                print("DEBUG=====", r)
+                award_income = check_award_income(unquote(r.get('tip')))
+                auto_get_award_id = json.loads(cookie.decode('utf-8')).get('userid')
+                if user_id == auto_get_award_id:
+                    if today_data['award_income'] is None:
+                        today_data['award_income'] = 0
+                    today_data['award_income'] += award_income
+        r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
+
+#def getaward_crystal():
+#    if DEBUG_MODE: 
+#        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
+#    str_today = datetime.now().strftime('%Y-%m-%d')
+#    for cookie in r_session.smembers('global:auto.getaward.cookies'):
+#        r = check_getaward(json.loads(cookie.decode('utf-8')))
+#        username = json.loads(cookie.decode('utf-8')).get('userid')
+#        key = 'user_data:%s:%s' % (username, str_today)
+#        award_income = check_award_income(r)
 
 # 计时器函数，定期执行某个线程，时间单位为秒
 def timer(func, seconds):   

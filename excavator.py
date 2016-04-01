@@ -8,8 +8,8 @@ import requests
 from urllib.parse import urlparse, parse_qs, unquote
 import time
 from datetime import datetime
-from api import ubus_cd, collect, exec_draw_cash, api_sys_getEntry, api_steal_search, api_steal_collect, api_steal_summary, api_getaward, check_award_income
-import re,sys
+import re
+from api import ubus_cd, collect, exec_draw_cash, api_sys_getEntry, api_steal_search, api_steal_collect, api_steal_summary, api_getaward
 
 # 加载矿机主页面
 @app.route('/excavators')
@@ -157,16 +157,6 @@ def getaward_id(user_id):
     account_data_key = account_key + ':data'
     account_data_value = json.loads(r_session.get(account_data_key).decode("utf-8"))
     account_data_value.get('mine_info')['td_not_in_a'] = 0
-    print("DEBUG 129")
-    sys.stdout.flush()
-    award_income = check_award_income(unquote(r.get('tip')))
-    print("DEBUG 130")
-    sys.stdout.flush()
-    if account_data_value.get('award_income') is None:
-        account_data_value['award_income'] = 0
-    account_data_value['award_income'] += award_income
-    print("DEBUG 137")
-    sys.stdout.flush()
     r_session.set(account_data_key, json.dumps(account_data_value))
 
     return redirect(url_for('excavators'))
@@ -199,11 +189,6 @@ def getaward_all():
             account_data_key = account_key + ':data'
             account_data_value = json.loads(r_session.get(account_data_key).decode("utf-8"))
             account_data_value.get('mine_info')['td_not_in_a'] = 0
-            award_income = check_award_income(unquote(r.get('tip')))
-            if account_data_value.get('award_income') is None:
-                account_data_value['award_income'] = 0
-            account_data_value['award_income'] += award_income
- 
             r_session.set(account_data_key, json.dumps(account_data_value))
     if len(success_message) > 0:
         session['info_message'] = success_message

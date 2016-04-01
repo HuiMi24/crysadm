@@ -156,13 +156,8 @@ def save_history(username):
         today_data['giftbox_pdc'] += data.get('mine_info').get('td_box_pdc')
         today_data.get('produce_stat').append(dict(mid=data.get('privilege').get('mid'), hourly_list=data.get('produce_info').get('hourly_list')))
         if data.get('award_income') is not None:
-            today_data['award_income'] += data.get('award_income')
+            today_data['award_income'] += getaward_crystal_income(username, user_id.decode('utf-8'))
         today_data['pdc'] += today_data['award_income'] 
-        now = datetime.now()
-        if(now.hour == 23 and now.minute >= 58 ) :
-            data['award_income'] = 0
-            r_session.set(account_data_key, json.dumps(data))
-            red_log("test", '自动执行', 'reset award_income', "to 0")
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
@@ -374,6 +369,31 @@ def check_searcht(cookies):
         red_log(user, '自动执行', '进攻', log)
     time.sleep(3)
 
+# get award income from log
+def getaward_crystal_income(username, user_id):
+    if DEBUG_MODE: 
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal_income')
+    today_award_income = 0
+    str_today = datetime.now().strftime('%Y-%m-%d')
+    key = '%s:%s' % ('user', username)
+    b_user_data = r_session.get(key)
+    if b_user_data is not None:
+        user_data = json.loads(b_user_data.decode('utf-8'))
+    if user_data.get('log_as_body') is not None:
+        user_log = user_data.get('log_as_body')
+    else:
+        return today_award_income
+    for item in user_log:
+        print("DEBUG ===", item)
+        sys.stdout.flush()
+        format = '%Y-%m-%d '
+        now = datetime.now()
+        log_time = datetime.strptime(item.get('time'), '%Y-%m-%d %H:%M:%S')
+        if log_time.day == now.day and user_id == item.get('id'):
+            today_award_income += check_award_income(item.get('gets'))
+        else:
+            return today_award_income
+
 # 执行幸运转盘函数
 def check_getaward(cookies):
     if DEBUG_MODE: 
@@ -474,7 +494,8 @@ def red_log(cook, clas, type, gets):
 
     user['log_as_body'] = log_as_body
 
-    r_session.set('%s:%s' % ('user', username), json.dumps(user))
+    #only save 7 days log
+    r_session.set('%s:%s' % ('user', username), json.dumps(user), 3600 * 24 * 7)
 
 # 计时器函数，定期执行某个线程，时间单位为秒
 def timer(func, seconds):   

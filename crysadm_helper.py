@@ -161,7 +161,13 @@ def save_history(username):
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
-
+            for saved_device in today_data['space']:
+                if saved_device.get('space_used') is not None\
+                and saved_device.get('device_id') == device.get('device_id')\
+                and saved_device.get('space_used') > device.get('space_used'):
+                    deleted_space = (saved_device.get('space_used') - device.get('space_used'))/1024/1024/1024
+                    red_log(user, '迅雷', '删除缓存', '矿机 %s 被删除缓存 %.3fG' % device.get('device_name'), deleted_space)
+            today_data['space'].append(dict(space_used=device.get('space_used'), device_id=device.get('device_id')))
     r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
     save_income_history(username, today_data.get('pdc_detail'))
 

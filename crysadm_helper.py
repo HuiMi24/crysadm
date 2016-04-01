@@ -391,8 +391,7 @@ def getaward_crystal_income(username, user_id):
         log_time = datetime.strptime(item.get('time'), '%Y-%m-%d %H:%M:%S')
         if log_time.day == now.day and user_id == item.get('id'):
             today_award_income += check_award_income(item.get('gets'))
-        else:
-            return today_award_income
+    return today_award_income
 
 # 执行幸运转盘函数
 def check_getaward(cookies):

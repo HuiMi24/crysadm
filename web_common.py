@@ -185,14 +185,13 @@ def dashboard_DoD_income():
 
     user_info = json.loads(r_session.get(user_key).decode('utf-8'))
     if user_info.get('auto_column') != True:
-        ls = dashboard_DoD_income_1()
+        dod_income = DoD_income_yuanjiangong()
     else:
-        ls = dashboard_DoD_income_2()
+        dod_income = DoD_income_xunlei()
 
-    return ls
-
+    return dod_income
 # 默认统计
-def dashboard_DoD_income_1():
+def DoD_income_yuanjiangong():
     user = session.get('user_info')
     username = user.get('username')
 
@@ -288,7 +287,7 @@ def dashboard_DoD_income_1():
                                     )), mimetype='application/json')
 
 # 迅雷统计
-def dashboard_DoD_income_2():
+def DoD_income_xunlei():
     user = session.get('user_info')
     username = user.get('username')
 

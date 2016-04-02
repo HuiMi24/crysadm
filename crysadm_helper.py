@@ -8,6 +8,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import random
 from urllib.parse import urlparse, parse_qs, unquote
+import sys
 
 conf = None
 if socket.gethostname() == 'GXMBP.local':
@@ -161,13 +162,17 @@ def save_history(username):
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
-            for saved_device in today_data['space']:
-                if saved_device.get('space_used') is not None\
-                and saved_device.get('device_id') == device.get('device_id')\
-                and saved_device.get('space_used') > device.get('space_used'):
-                    deleted_space = (saved_device.get('space_used') - device.get('space_used'))/1024/1024/1024
-                    red_log(user, '迅雷', '删除缓存', '矿机 %s 被删除缓存 %.3fG' % device.get('device_name'), deleted_space)
-            today_data['space'].append(dict(space_used=device.get('space_used'), device_id=device.get('device_id')))
+            #current_space_used = device.get('dcdn_clients')[0].get('space_used')
+            #if today_data.get('space') is None:
+            #    today_data['space'] = []
+            #else:
+            #    for saved_device in today_data['space']:
+            #        if saved_device.get('space_used') is not None\
+            #        and saved_device.get('device_id') == device.get('device_id')\
+            #        and saved_device.get('space_used') > current_space_used:
+            #            deleted_space = (saved_device.get('space_used') - current_space_used)/1024/1024/1024
+            #            red_log(user, '迅雷', '删除缓存', '矿机 %s 被删除缓存 %.3fG' % device.get('device_name'), deleted_space)
+            #today_data['space'].append(dict(space_used=current_space_used, device_id=device.get('device_id')))
     r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
     save_income_history(username, today_data.get('pdc_detail'))
 
@@ -390,9 +395,6 @@ def getaward_crystal_income(username, user_id):
     else:
         return today_award_income
     for item in user_log:
-        print("DEBUG ===", item)
-        sys.stdout.flush()
-        format = '%Y-%m-%d '
         now = datetime.now()
         log_time = datetime.strptime(item.get('time'), '%Y-%m-%d %H:%M:%S')
         if log_time.day == now.day and user_id == item.get('id'):
@@ -413,6 +415,8 @@ def check_getaward(cookies):
         else:
             log = '获得:%s' % regular_html(t.get('tip'))
         red_log(user, '自动执行', '转盘', log)
+
+
     time.sleep(3)
     return r
 
@@ -463,6 +467,8 @@ def getaward_crystal():
 #        check_getaward(json.loads(cookie.decode('utf-8')))
 # 处理函数[重组]
 def cookies_auto(func, cookiename):
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'execute %s' % str(func))
     users = r_session.smembers(cookiename)
     if users is not None and len(users) > 0:
         for user in users:
@@ -521,7 +527,7 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(giftbox_crystal, random.randint(60*20, 60*40))).start()
     # 执行秘银进攻时间，单位为秒，默认为240秒。
     # 每240分钟检测一次秘银进攻
-    threading.Thread(target=timer, args=(searcht_crystal, 60*60*4)).start()
+    threading.Thread(target=timer, args=(searcht_crystal, 60*60)).start()
     # 执行幸运转盘时间，单位为秒，默认为60秒。
     # 每60分钟检测一次幸运转盘
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()

@@ -199,19 +199,9 @@ def ubus_cd(session_id, account_id, action, out_params, url_param=None):
         return __handle_exception(e=e)
 
 def check_award_income(r):
-    print("DEBUG=== 202", r)
-    sys.stdout.flush()
-    crystal_pattern = re.compile('.*>([0-9]+)<.*水晶.*')
-    print("DEBUG=== 205", crystal_pattern)
-    sys.stdout.flush()
+    crystal_pattern = re.compile('.*抽中([0-9]+).*水晶.*')
     crystal_match = crystal_pattern.match(r)
-    print("DEBUG=== 208", crystal_match)
-    sys.stdout.flush()
     if crystal_match:
-        print("DEBUG=== 211")
-        sys.stdout.flush()
-        print("DEBUG===", crystal_match.group(1))
-        sys.stdout.flush()
         return int(crystal_match.group(1))
     return 0
 

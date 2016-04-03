@@ -12,6 +12,8 @@ def user_log():
     user = session.get('user_info')
 
     record_key = '%s:%s' % ('record', user.get('username'))
+    if r_session.get(record_key) is None:
+        return render_template('log.html', log_user=[])
     record_info = json.loads(r_session.get(record_key).decode('utf-8'))
 
     for row in record_info.get('diary'):

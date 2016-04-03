@@ -56,7 +56,10 @@ def red_log(clas, type, id, gets):
     user = session.get('user_info')
 
     record_key = '%s:%s' % ('record', user.get('username'))
-    record_info = json.loads(r_session.get(record_key).decode('utf-8'))
+    if r_session.get(record_key) is None:
+        record_info = dict(diary=[])
+    else:
+        record_info = json.loads(r_session.get(record_key).decode('utf-8'))
 
     log_as_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     body = dict(time=log_as_time, clas=clas, type=type, id=id, gets=gets)

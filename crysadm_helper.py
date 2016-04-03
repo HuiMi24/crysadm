@@ -386,6 +386,8 @@ def getaward_crystal_income(username, user_id):
     b_user_data = r_session.get(key)
     if b_user_data is not None:
         user_data = json.loads(b_user_data.decode('utf-8'))
+    else:
+        return today_award_income
     if user_data.get('diary') is not None:
         user_log = user_data.get('diary')
     else:
@@ -489,7 +491,10 @@ def red_log(cook, clas, type, gets):
     user = cook.get('user_info')
 
     record_key = '%s:%s' % ('record', user.get('username'))
-    record_info = json.loads(r_session.get(record_key).decode('utf-8'))
+    if r_session.get(record_key) is None:
+        record_info = dict(diary=[])
+    else:
+        record_info = json.loads(r_session.get(record_key).decode('utf-8'))
 
     id = cook.get('userid')
 

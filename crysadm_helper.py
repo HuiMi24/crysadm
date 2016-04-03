@@ -221,7 +221,6 @@ def get_online_user_data():
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'): return
-        return
 
     pool = ThreadPool(processes=1)
 
@@ -235,7 +234,6 @@ def get_offline_user_data():
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'): return
     if datetime.now().minute < 50: return
-        return
 
     offline_users = []
     for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.sdiff('users', *r_session.smembers('global:online.users'))]):

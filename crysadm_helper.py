@@ -322,7 +322,7 @@ def check_collect(user, cookies):
     time.sleep(3)
 
 # 执行自动提现的函数
-def check_drawcash(cookies):
+def check_drawcash(user, cookies):
     if DEBUG_MODE:
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_drawcash')
     r = exec_draw_cash(cookies=cookies, limits=10)
@@ -330,7 +330,7 @@ def check_drawcash(cookies):
     time.sleep(3)
 
 # 执行免费宝箱函数
-def check_giftbox(cookies):
+def check_giftbox(user, cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
     box_info = api_giftbox(cookies)
@@ -354,7 +354,7 @@ def check_giftbox(cookies):
     time.sleep(3)
 
 # 执行秘银进攻函数
-def check_searcht(cookies):
+def check_searcht(user, cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
     r = api_sys_getEntry(cookies)
@@ -382,7 +382,7 @@ def getaward_crystal_income(username, user_id):
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal_income')
     today_award_income = 0
     str_today = datetime.now().strftime('%Y-%m-%d')
-    key = '%s:%s' % ('user', username)
+    key = '%s:%s' % ('record', username)
     b_user_data = r_session.get(key)
     if b_user_data is not None:
         user_data = json.loads(b_user_data.decode('utf-8'))
@@ -398,7 +398,7 @@ def getaward_crystal_income(username, user_id):
     return today_award_income
 
 # 执行幸运转盘函数
-def check_getaward(cookies):
+def check_getaward(user, cookies):
     if DEBUG_MODE: 
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
     r = api_getconfig(cookies)

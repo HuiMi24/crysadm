@@ -32,7 +32,7 @@ def get_data(username):
     start_time = datetime.now()
     try:
         for user_id in r_session.smembers('accounts:%s' % username):
-            
+            time.sleep(3)
             account_key = 'account:%s:%s' % (username, user_id.decode('utf-8'))
             account_info = json.loads(r_session.get(account_key).decode('utf-8'))
 
@@ -388,8 +388,8 @@ def getaward_crystal_income(username, user_id):
     b_user_data = r_session.get(key)
     if b_user_data is not None:
         user_data = json.loads(b_user_data.decode('utf-8'))
-    if user_data.get('log_as_body') is not None:
-        user_log = user_data.get('log_as_body')
+    if user_data.get('diary') is not None:
+        user_log = user_data.get('diary')
     else:
         return today_award_income
     for item in user_log:
@@ -490,26 +490,23 @@ def regular_html(info):
 def red_log(cook, clas, type, gets):
     user = cook.get('user_info')
 
-    user_key = '%s:%s' % ('user', user.get('username'))
-    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
+    record_key = '%s:%s' % ('record', user.get('username'))
+    record_info = json.loads(r_session.get(record_key).decode('utf-8'))
 
     id = cook.get('userid')
-
-    if user_info.get('log_as_body') is None:
-        user_info['log_as_body'] = []
 
     log_as_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     body = dict(time=log_as_time, clas=clas, type=type, id=id, gets=gets)
 
-    log_as_body = user_info.get('log_as_body')
+    log_as_body = record_info.get('diary')
     log_as_body.append(body)
 
-    user_info['log_as_body'] = log_as_body
+    record_info['diary'] = log_as_body
 
-    r_session.set(user_key, json.dumps(user_info), 3600 * 24 * 7)
+    r_session.set(record_key, json.dumps(record_info))
 
 # 计时器函数，定期执行某个线程，时间单位为秒
-def timer(func, seconds):   
+def timer(func, seconds):
     while True:
         Process(target=func).start()
         time.sleep(seconds)

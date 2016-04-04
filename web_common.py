@@ -29,9 +29,9 @@ def __get_yesterday_pdc(username):
             continue
 
         history_data = json.loads(b_data.decode('utf-8'))
-        if begin_date >= month_start_date:
+        if begin_date >= month_start_date and begin_date < today.date():
             yesterday_m_pdc += history_data.get('pdc')
-        if begin_date >= week_start_date:
+        if begin_date >= week_start_date and begin_date < today.date():
             yesterday_w_pdc += history_data.get('pdc')
 
     return yesterday_m_pdc, yesterday_w_pdc
@@ -76,12 +76,13 @@ def dashboard_data():
 
     today_data = json.loads(b_data.decode('utf-8'))
     need_save = False
+
     if today_data.get('yesterday_m_pdc') is None or today_data.get('yesterday_w_pdc') is None:
         yesterday_m_pdc, yesterday_w_pdc = __get_yesterday_pdc(username)
         today_data['yesterday_m_pdc'] = yesterday_m_pdc
         today_data['yesterday_w_pdc'] = yesterday_w_pdc
         need_save = True
-
+    
     today_data['m_pdc'] = today_data.get('yesterday_m_pdc') + today_data.get('pdc')
     today_data['w_pdc'] = today_data.get('yesterday_w_pdc') + today_data.get('pdc')
 

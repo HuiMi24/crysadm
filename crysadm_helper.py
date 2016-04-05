@@ -304,7 +304,7 @@ def select_auto_task_user():
     if len(auto_searcht_accounts) != 0:
         r_session.sadd('global:auto.searcht.cookies', *auto_searcht_accounts)
     r_session.delete('global:auto.revenge.cookies')
-	if len(auto_revenge_accounts) != 0:
+    if len(auto_revenge_accounts) != 0:
         r_session.sadd('global:auto.revenge.cookies', *auto_revenge_accounts)
     r_session.delete('global:auto.getaward.cookies')
     if len(auto_getaward_accounts) != 0:

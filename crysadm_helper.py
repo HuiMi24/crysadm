@@ -556,6 +556,9 @@ if __name__ == '__main__':
     # 执行秘银进攻时间，单位为秒，默认为240秒。
     # 每240分钟检测一次秘银进攻
     threading.Thread(target=timer, args=(searcht_crystal, 60*60)).start()
+    # 执行秘银复仇时间，单位为秒，默认为300秒。
+    # 每300分钟检测一次秘银复仇
+    threading.Thread(target=timer, args=(revenge_crystal, 60*60*5)).start()
     # 执行幸运转盘时间，单位为秒，默认为60秒。
     # 每60分钟检测一次幸运转盘
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()

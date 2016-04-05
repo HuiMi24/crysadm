@@ -30,6 +30,17 @@ def user_login():
         session['error_message'] = '您的账号已被禁用.'
         return redirect(url_for('login'))
 
+    if user.get('log_as_body') is not None:
+        if len(user.get('log_as_body')) > 0:
+            r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=user.get('log_as_body')))) # 创建新通道,转移原本日记
+            user['log_as_body'] = []
+
+    user['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S') # 记录登陆时间
+    r_session.set('%s:%s' % ('user', username), json.dumps(user)) # 修正数据
+
+    if r_session.get('%s:%s' % ('record', username)) is None:
+        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[]))) # 创建缺失的日记
+
     session['user_info'] = user
 
     return redirect(url_for('dashboard'))
@@ -127,6 +138,8 @@ def user_change_property(field, value):
         user_info['auto_giftbox'] = True if value == '1' else False
     if field == 'auto_searcht':
         user_info['auto_searcht'] = True if value == '1' else False
+    if field == 'auto_revenge':
+        user_info['auto_revenge'] = True if value == '1' else False
     if field == 'auto_getaward':
         user_info['auto_getaward'] = True if value == '1' else False
 
@@ -227,6 +240,7 @@ def user_register():
                 active=True, is_admin=False, max_account_no=20,
                 created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
+    r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[])))
     r_session.sadd('users', username)
 
     session['info_message'] = '恭喜你，注册成功.'

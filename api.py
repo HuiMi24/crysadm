@@ -160,10 +160,16 @@ def api_sys_getEntry(cookies):
     body = dict(v='6')
     return api_post(url='/?r=sys/getEntry', data=body, cookies=cookies)
 
-# 提交秘银进攻请求
-def api_steal_search(cookies):
+# 获取秘银复仇信息
+def api_steal_stolenSilverHistory(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
-    body = dict(v='2')
+    body = dict(v='2', p='0', ps='20')
+    return api_post(url='/?r=steal/stolenSilverHistory', data=body, cookies=cookies)
+
+# 提交秘银进攻请求
+def api_steal_search(cookies, searcht_id=0):
+    cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
+    body = dict(v='2', sid=str(searcht_id))
     return api_post(url='/?r=steal/search', data=body, cookies=cookies)
 
 # 提交收集秘银请求

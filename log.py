@@ -1,5 +1,5 @@
 
-from flask import render_template, session, Response
+from flask import render_template, session, Response, redirect, url_for
 from crysadm import app, r_session
 from auth import requires_auth
 from datetime import datetime, timedelta
@@ -44,4 +44,4 @@ def user_log_delete():
 
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
 
-    return redirect(url_for('user_log'))
+    return redirect(url_for('log'))

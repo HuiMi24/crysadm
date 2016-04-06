@@ -69,7 +69,7 @@ def red_log(clas, type, id, gets):
 
     record_info['diary'] = log_as_body
 
-    r_session.set(record_key, json.dumps(record_info))
+    r_session.set(record_key, json.dumps(record_info), 3600*48)
 
 # 收取水晶[id]
 @app.route('/collect/<user_id>', methods=['POST'])

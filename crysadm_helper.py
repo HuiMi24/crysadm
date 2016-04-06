@@ -425,6 +425,7 @@ def getaward_crystal_income(username, user_id):
         log_time = datetime.strptime(item.get('time'), '%Y-%m-%d %H:%M:%S')
         if log_time.day == now.day and user_id == item.get('id'):
             today_award_income += check_award_income(item.get('gets'))
+    time.sleep(3)
     return today_award_income
 
 # 执行幸运转盘函数
@@ -483,6 +484,13 @@ def searcht_crystal():
 #    for cookie in r_session.smembers('global:auto.searcht.cookies'):
 #        check_searcht(json.loads(cookie.decode('utf-8')))
 
+# 秘银复仇
+def revenge_crystal():
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'revenge_crystal')
+
+    cookies_auto(check_revenge, 'global:auto.revenge.cookies')
+
+
 # 幸运转盘
 def getaward_crystal():
     if DEBUG_MODE: 
@@ -534,7 +542,7 @@ def red_log(cook, clas, type, gets):
 
     record_info['diary'] = log_as_body
 
-    r_session.set(record_key, json.dumps(record_info))
+    r_session.set(record_key, json.dumps(record_info), 3600*48)
 
 # 计时器函数，定期执行某个线程，时间单位为秒
 def timer(func, seconds):

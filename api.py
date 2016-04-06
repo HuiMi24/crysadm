@@ -163,7 +163,7 @@ def api_sys_getEntry(cookies):
 # 获取秘银复仇信息
 def api_steal_stolenSilverHistory(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
-    body = dict(v='2', p='0', ps='20')
+    body = dict(v='2')
     return api_post(url='/?r=steal/stolenSilverHistory', data=body, cookies=cookies)
 
 # 提交秘银进攻请求

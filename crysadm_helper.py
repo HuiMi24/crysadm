@@ -36,6 +36,12 @@ def get_data(username):
             account_key = 'account:%s:%s' % (username, user_id.decode('utf-8'))
             account_info = json.loads(r_session.get(account_key).decode('utf-8'))
 
+            #clean the log everyday
+            record_key = '%s:%s' % ('record', username)
+            if start_time.hour == 23 and start_time.minute >=55:
+                record_info = dict(diary=[])
+                r_session.set(record_key, json.dumps(record_info))
+
             if not account_info.get('active'): continue
 
             if DEBUG_MODE:            
@@ -542,7 +548,7 @@ def red_log(cook, clas, type, gets):
 
     record_info['diary'] = log_as_body
 
-    r_session.set(record_key, json.dumps(record_info), 3600*48)
+    r_session.set(record_key, json.dumps(record_info), 3600*24)
 
 # 计时器函数，定期执行某个线程，时间单位为秒
 def timer(func, seconds):
@@ -566,7 +572,7 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(searcht_crystal, 60*60)).start()
     # 执行秘银复仇时间，单位为秒，默认为300秒。
     # 每300分钟检测一次秘银复仇
-    threading.Thread(target=timer, args=(revenge_crystal, 60*60*5)).start()
+    threading.Thread(target=timer, args=(revenge_crystal, 60*60)).start()
     # 执行幸运转盘时间，单位为秒，默认为60秒。
     # 每60分钟检测一次幸运转盘
     threading.Thread(target=timer, args=(getaward_crystal, 60*60)).start()

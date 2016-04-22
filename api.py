@@ -14,7 +14,7 @@ appversion = '3.1.1'
 server_address = 'http://2-api-red.xunlei.com'
 agent_header = {'user-agent': "RedCrystal/3.0.0 (Android 4.1)"}
 
-DEBUG_MODE = True 
+DEBUG_MODE = False
 # 提交迅雷链接，返回信息
 def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60):
     address = server_address + url

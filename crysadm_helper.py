@@ -464,7 +464,8 @@ def collect_crystal():
 
 # 自动提现
 def drawcash_crystal():
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'drawcash_crystal')   
+    if DEBUG_MODE:
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'drawcash_crystal')   
     time_now = datetime.now()
     if int(time_now.isoweekday()) != 2: return
     if int(time_now.hour) < 11 or int(time_now.hour) > 18: return

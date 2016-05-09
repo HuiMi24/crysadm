@@ -122,7 +122,7 @@
                                 <th class="col-md-1">状态</th>
                                 <th class="col-md-1 hidden-xs" style="min-width: 110px;">UPNP</th>
                                 <th class="col-md-1 hidden-xs">IP</th>
-                                <th class="col-md-1" style="text-align: right;">操作</th>
+                                <th class="col-md-1" style="text-align: right;min-width: 100px;" >操作</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -154,9 +154,13 @@
                                                         <span class="label label-info">
                                                                 在线
                                                                 </span>
-                                                    {% else %}
+                                                    {% elif dev.status == 'offline' %}
                                                         <span class="label label-warning">
                                                                 断网
+                                                                </span>
+                                                    {% else %}
+                                                        <span class="label label-warning">
+                                                                异常
                                                                 </span>
                                                     {% endif %}
                                                     {% if dev.upgradeable %}
@@ -216,6 +220,7 @@
                                                                 <input type="hidden" name="device_id" value="{{ dev.device_id }}" />
                                                                 <input type="hidden" name="account_id" value="{{ dev.account_name }}" />
                                                                 <input type="hidden" name="session_id" value="{{ row.session_id }}" />
+																<button type="submit" style="margin: 0px;" class="btn btn-info btn-xs" onclick="window.open('http://kj.xunlei.com/setting.html?user_id={{ row.user_id|e }}&session_id={{ row.session_id }}&device_id={{ dev.device_id }}');return false;">APP</button>
                                                                 <button type="submit" style="margin: 0px;" class="btn btn-info btn-xs">管理</button>
                                                             </form>
                                                         {% endif %}

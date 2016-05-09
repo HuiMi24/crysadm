@@ -384,6 +384,7 @@ def install():
                     active=True, is_admin=True, max_account_no=5,
                     created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         r_session.set('%s:%s' % ('user', username), json.dumps(user))
+        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[])))
         r_session.sadd('users', username)
         return 'username:%s,password:%s' % (username, password)
 

@@ -72,7 +72,7 @@ def get_data(username):
                 print('get_data:', user_id, mine_info, 'error')
                 continue
 
-            device_info = ubus_cd(session_id, user_id, 'get_devices', ["server", "get_devices", {}], '&action=%donResponse' % int(time.time()*1000))
+            device_info = ubus_cd(session_id, user_id, 'get_devices', ["server", "get_devices", {}])
             red_zqb = device_info['result'][1]
 
             account_data_key = account_key + ':data'
@@ -279,6 +279,7 @@ def select_auto_task_user():
     auto_searcht_accounts = []
     auto_revenge_accounts = []
     auto_getaward_accounts = []
+    auto_detect_accounts = []
     for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.smembers('users')]):
         user_info = json.loads(b_user.decode('utf-8'))
         if not user_info.get('active'): continue
@@ -297,6 +298,7 @@ def select_auto_task_user():
             if user_info.get('auto_searcht'): auto_searcht_accounts.append(cookies)
             if user_info.get('auto_revenge'): auto_revenge_accounts.append(cookies)
             if user_info.get('auto_getaward'): auto_getaward_accounts.append(cookies)
+            if user_info.get('auto_detect'): auto_detect_accounts.append(cookies)
     r_session.delete('global:auto.collect.cookies')
     if len(auto_collect_accounts) != 0:
         r_session.sadd('global:auto.collect.cookies', *auto_collect_accounts)
@@ -313,8 +315,9 @@ def select_auto_task_user():
     if len(auto_revenge_accounts) != 0:
         r_session.sadd('global:auto.revenge.cookies', *auto_revenge_accounts)
     r_session.delete('global:auto.getaward.cookies')
-    if len(auto_getaward_accounts) != 0:
-        r_session.sadd('global:auto.getaward.cookies', *auto_getaward_accounts)
+    r_session.sadd('global:auto.getaward.cookies', *auto_getaward_accounts)
+    r_session.delete('global:auto.detect.cookies')
+    r_session.sadd('global:auto.detect.cookies', *auto_detect_accounts)
 
 # 执行检测异常矿机函数
 def detect_exception(user, cookies, user_info):

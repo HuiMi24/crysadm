@@ -574,6 +574,16 @@ def getaward_crystal():
     cookies_auto(check_getaward, 'global:auto.getaward.cookies')
 #    for cookie in r_session.smembers('global:auto.getaward.cookies'):
 #        check_getaward(json.loads(cookie.decode('utf-8')))
+
+# 自动监测
+def auto_detect():
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'auto_detect')
+
+    cookies_auto(detect_exception, 'global:auto.detect.cookies')
+#    for cookie in r_session.smembers('global:auto.getaward.cookies'):
+#        check_getaward(json.loads(cookie.decode('utf-8')))
+
+
 # 处理函数[重组]
 def cookies_auto(func, cookiename):
     if DEBUG_MODE:

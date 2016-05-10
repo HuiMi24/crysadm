@@ -10,6 +10,7 @@ import re
 import random
 from message import send_msg
 
+
 # 系统管理 => 用户管理
 @app.route('/admin/user')
 @requires_admin
@@ -24,7 +25,7 @@ def admin_user():
         if user.get('login_as_time') is not None:
             if (datetime.now() - datetime.strptime(user.get('login_as_time'), '%Y-%m-%d %H:%M:%S')).days < 3:
                 recent_login_users.append(user)
-        user['is_online'] = r_session.exists('user:%s:is_online' % user.get('username')) # 临时寄存数据
+        user['is_online'] = r_session.exists('user:%s:is_online' % user.get('username'))  # 临时寄存数据
         users.append(user)
 
     return render_template('admin_user.html',
@@ -32,11 +33,13 @@ def admin_user():
                                                      reverse=True),
                            users=users)
 
+
 # 系统管理 => 通知管理
 @app.route('/admin/message')
 @requires_admin
 def admin_message():
     return render_template('admin_message.html')
+
 
 # 系统管理 => 邀请管理
 @app.route('/admin/invitation')
@@ -46,6 +49,7 @@ def admin_invitation():
 
     inv_codes = r_session.smembers('invitation_codes')
     return render_template('admin_invitation.html', inv_codes=inv_codes, public_inv_codes=pub_inv_codes)
+
 
 # 系统管理 => 邀请管理 => 生成邀请码
 @app.route('/generate/inv_code', methods=['POST'])
@@ -58,6 +62,7 @@ def generate_inv_code():
         r_session.sadd('invitation_codes', ''.join(random.sample(_chars, 10)))
 
     return redirect(url_for('admin_invitation'))
+
 
 # 系统管理 => 邀请管理 => 生成公开邀请码
 @app.route('/generate/pub_inv_code', methods=['POST'])
@@ -72,6 +77,7 @@ def generate_pub_inv_code():
 
     return redirect(url_for('admin_invitation'))
 
+
 # 系统管理 => 用户管理 => 登陆其它用户
 @app.route('/admin/login_as/<username>', methods=['POST'])
 @requires_admin
@@ -83,17 +89,19 @@ def generate_login_as(username):
 
     if user.get('log_as_body') is not None:
         if len(user.get('log_as_body')) > 0:
-            r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=user.get('log_as_body')))) # 创建新通道,转移原本日记
+            r_session.set('%s:%s' % ('record', username),
+                          json.dumps(dict(diary=user.get('log_as_body'))))  # 创建新通道,转移原本日记
             user['log_as_body'] = []
 
     if r_session.get('%s:%s' % ('record', username)) is None:
-        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[]))) # 创建缺失的日记
+        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[])))  # 创建缺失的日记
 
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
     session['admin_user_info'] = session.get('user_info')
     session['user_info'] = user
 
     return redirect(url_for('dashboard'))
+
 
 # 系统管理 => 用户管理 => 编辑用户资料
 @app.route('/admin_user/<username>')
@@ -107,6 +115,7 @@ def admin_user_management(username):
     user = json.loads(r_session.get('user:%s' % username).decode('utf-8'))
 
     return render_template('user_management.html', user=user, err_msg=err_msg)
+
 
 # 系统管理 => 用户管理 => 编辑用户资料 => 修改密码
 @app.route('/admin/change_password/<username>', methods=['POST'])
@@ -125,6 +134,7 @@ def admin_change_password(username):
     r_session.set(user_key, json.dumps(user_info))
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
+
 
 # 系统管理 => 用户管理 => 编辑用户资料 => 修改其它属性
 @app.route('/admin/change_property/<field>/<value>/<username>', methods=['POST'])
@@ -167,6 +177,7 @@ def admin_change_property(field, value, username):
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
+
 # 系统管理 => 用户管理 => 编辑用户资料 => 提示信息
 @app.route('/admin/change_user_info/<username>', methods=['POST'])
 @requires_admin
@@ -192,6 +203,7 @@ def admin_change_user_info(username):
 
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
+
 # 系统管理 => 用户管理 => 删除用户
 @app.route('/admin/del_user/<username>', methods=['GET'])
 @requires_admin
@@ -214,6 +226,7 @@ def admin_del_user(username):
         r_session.delete(key.decode('utf-8'))
 
     return redirect(url_for('admin_user'))
+
 
 # 系统管理 => 用户管理 => 无用户？
 @app.route('/none_user')
@@ -238,6 +251,7 @@ def none_user():
 
     return json.dumps(dict(none_xlAcct=none_xlAcct, none_active_xlAcct=none_active_xlAcct))
 
+
 # 系统管理 => 用户管理 => 删除无用户？
 @app.route('/del_none_user')
 @requires_admin
@@ -259,6 +273,7 @@ def del_none_user():
             none_active_xlAcct.append(username)
 
     return json.dumps(dict(none_active_xlAcct=none_active_xlAcct))
+
 
 # 系统管理 => 通知管理 => 发送通知
 @app.route('/admin/message/send', methods=['POST'])
@@ -291,10 +306,10 @@ def admin_message_send():
 
     return redirect(url_for(endpoint='admin_message'))
 
+
 @app.route('/admin/settings')
 @requires_admin
 def system_config():
-
     config_key = '%s:%s' % ('user', 'system')
     config_info = json.loads(r_session.get(config_key).decode('utf-8'))
 
@@ -309,12 +324,13 @@ def system_config():
 
     return render_template('admin_settings.html', user_info=config_info, err_msg=err_msg, action=action)
 
+
 # 站长交流
 @app.route('/talk')
 @requires_admin
 def admin_talk():
-
     return render_template('talk.html')
+
 
 # 站点监控 => 站点记录
 @app.route('/guest')
@@ -334,11 +350,11 @@ def admin_guest():
 
     return render_template('guest.html', guest_as=guest_as)
 
+
 # 系统管理 => 删除站点记录
 @app.route('/guest/delete')
 @requires_admin
 def admin_guest_delete():
-
     guest_key = 'guest'
     guest_info = json.loads(r_session.get(guest_key).decode('utf-8'))
 
@@ -347,6 +363,7 @@ def admin_guest_delete():
     r_session.set(guest_key, json.dumps(guest_info))
 
     return redirect(url_for('admin_guest'))
+
 
 # 站点监控 => 邀请记录
 @app.route('/guest/invitation')
@@ -366,11 +383,11 @@ def guest_invitation():
 
     return render_template('guest_invitation.html', public_as=public_as)
 
+
 # 站点监控 => 删除邀请记录
 @app.route('/guest/invitation/delete')
 @requires_admin
 def guest_invitation_delete():
-
     public_key = 'invitation'
     public_info = json.loads(r_session.get(public_key).decode('utf-8'))
 
@@ -379,6 +396,7 @@ def guest_invitation_delete():
     r_session.set(public_key, json.dumps(public_info))
 
     return redirect(url_for('guest_invitation'))
+
 
 # 系统管理 => 关于
 @app.route('/about')

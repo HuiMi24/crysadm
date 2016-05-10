@@ -9,6 +9,7 @@ import struct
 
 import sys
 
+
 # 获取前一日收益
 def __get_yesterday_pdc(username):
     today = datetime.now()
@@ -36,6 +37,7 @@ def __get_yesterday_pdc(username):
 
     return yesterday_m_pdc, yesterday_w_pdc
 
+
 # 显示控制面板
 @app.route('/dashboard')
 @requires_auth
@@ -47,6 +49,7 @@ def dashboard():
     user_info = json.loads(r_session.get(user_key).decode('utf-8'))
 
     return render_template('dashboard.html', user_info=user_info)
+
 
 # 刷新控制面板数据
 @app.route('/dashboard_data')
@@ -63,7 +66,7 @@ def dashboard_data():
             'updated_time': '2015-01-01 00:00:00',
             'm_pdc': 0,
             'last_speed': 0,
-            'deploy_speed' : 0,
+            'deploy_speed': 0,
             'w_pdc': 0,
             'yesterday_m_pdc': 0,
             'speed_stat': [],
@@ -82,7 +85,7 @@ def dashboard_data():
         today_data['yesterday_m_pdc'] = yesterday_m_pdc
         today_data['yesterday_w_pdc'] = yesterday_w_pdc
         need_save = True
-    
+
     today_data['m_pdc'] = today_data.get('yesterday_m_pdc') + today_data.get('pdc')
     today_data['w_pdc'] = today_data.get('yesterday_w_pdc') + today_data.get('pdc')
 
@@ -90,6 +93,7 @@ def dashboard_data():
         r_session.set(key, json.dumps(today_data))
 
     return Response(json.dumps(dict(today_data=today_data)), mimetype='application/json')
+
 
 # 刷新控制面板图表速度数据
 @app.route('/dashboard/speed_share')
@@ -112,15 +116,16 @@ def dashboard_speed_share():
         for device_info in account_info.get('device_info'):
             if device_info.get('status') != 'online':
                 continue
-            uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)            
-            total_speed += uploadspeed            
-            device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))            
+            uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)
+            total_speed += uploadspeed
+            device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))
             # device_speed.append(dict(name=device_info.get('device_name'), value=total_speed))
 
         # 显示在速度分析器圆形图表上的设备ID
         drilldown_data.append(dict(name='矿主ID:' + mid, value=total_speed, drilldown_data=device_speed))
 
     return Response(json.dumps(dict(data=drilldown_data)), mimetype='application/json')
+
 
 # 显示控制面板速度详情
 @app.route('/dashboard/speed_detail')
@@ -142,7 +147,8 @@ def dashboard_speed_detail():
             upload_speed = int(int(device_info.get('dcdn_upload_speed')) / 1024)
             deploy_speed = int(device_info.get('dcdn_download_speed') / 1024)
 
-            device_speed.append(dict(name=device_info.get('device_name'), upload_speed=upload_speed, deploy_speed=deploy_speed))
+            device_speed.append(
+                dict(name=device_info.get('device_name'), upload_speed=upload_speed, deploy_speed=deploy_speed))
 
     device_speed = sorted(device_speed, key=lambda k: k.get('name'))
     categories = []
@@ -153,7 +159,9 @@ def dashboard_speed_detail():
         upload_series.get('data').append(d_s.get('upload_speed'))
         deploy_series.get('data').append(d_s.get('deploy_speed'))
 
-    return Response(json.dumps(dict(categories=categories, series=[upload_series, deploy_series])), mimetype='application/json')
+    return Response(json.dumps(dict(categories=categories, series=[upload_series, deploy_series])),
+                    mimetype='application/json')
+
 
 # 刷新今日收益
 @app.route('/dashboard/today_income_share')
@@ -191,6 +199,8 @@ def dashboard_DoD_income():
         dod_income = DoD_income_xunlei()
 
     return dod_income
+
+
 # 默认统计
 def DoD_income_yuanjiangong():
     user = session.get('user_info')
@@ -223,8 +233,10 @@ def DoD_income_yuanjiangong():
     if b_yesterday_user_data is None:
         return Response(json.dumps(dict(data=[])), mimetype='application/json')
 
-    today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
-    yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
+    today_speed_series = dict(name='今日', data=[], type='spline', pointPadding=0.2, pointPlacement=0, color='#676A6C',
+                              tooltip=dict(valueSuffix=' kbps'))
+    yesterday_speed_series = dict(name='昨日', data=[], type='spline', pointPadding=-0.1, pointPlacement=0,
+                                  color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
 
     today_speed_data = b_today_user_data.get('speed_stat')
     yesterday_speed_data = b_yesterday_user_data.get('speed_stat')
@@ -287,6 +299,7 @@ def DoD_income_yuanjiangong():
                                               expected_income=expected_income)
                                     )), mimetype='application/json')
 
+
 # 迅雷统计
 def DoD_income_xunlei():
     user = session.get('user_info')
@@ -307,19 +320,21 @@ def DoD_income_xunlei():
     key = 'user_data:%s:%s' % (username, now.strftime('%Y-%m-%d'))
     b_today_data_new = r_session.get(key)
     today_data = json.loads(b_today_data_new.decode('utf-8'))
-    
+
     today_series['data'] = []
-    for i in range(24-now.hour, 25):
-        temp = 0 
+    for i in range(24 - now.hour, 25):
+        temp = 0
         for hourly_produce in today_data.get('produce_stat'):
-            temp +=  hourly_produce.get('hourly_list')[i]
+            temp += hourly_produce.get('hourly_list')[i]
         today_series['data'].append(temp)
 
     key = 'user_data:%s:%s' % (username, (now + timedelta(days=-1)).strftime('%Y-%m-%d'))
     b_yesterday_data_new = r_session.get(key)
 
-    today_speed_series = dict(name='今日', data=[], type = 'spline', pointPadding=0.2, pointPlacement=0, color='#676A6C', tooltip=dict(valueSuffix=' kbps'))
-    yesterday_speed_series = dict(name='昨日', data=[], type = 'spline', pointPadding=-0.1, pointPlacement=0, color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
+    today_speed_series = dict(name='今日', data=[], type='spline', pointPadding=0.2, pointPlacement=0, color='#676A6C',
+                              tooltip=dict(valueSuffix=' kbps'))
+    yesterday_speed_series = dict(name='昨日', data=[], type='spline', pointPadding=-0.1, pointPlacement=0,
+                                  color='#1AB394', tooltip=dict(valueSuffix=' kbps'))
     today_speed_data = today_data.get('speed_stat')
 
     if b_yesterday_data_new is None:
@@ -347,7 +362,7 @@ def DoD_income_xunlei():
         if today_speed_data is not None:
             today_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in today_speed_data))
 
-    today_speed_series['data'].append(today_data.get('last_speed')*8)
+    today_speed_series['data'].append(today_data.get('last_speed') * 8)
     now_income_value = sum(today_series['data'][0:now.hour])
     dod_income_value = sum(yesterday_series['data'][:now.hour])
     yesterday_last_value = sum(yesterday_series['data'][:])
@@ -368,6 +383,7 @@ def DoD_income_xunlei():
 @app.route('/')
 def index():
     return redirect(url_for('login'))
+
 
 # 显示crysadm管理员界面（初次登录）
 @app.route('/install')
@@ -390,6 +406,7 @@ def install():
 
     return redirect(url_for('login'))
 
+
 # 添加用户
 @app.context_processor
 def add_function():
@@ -410,6 +427,7 @@ def add_function():
         return socket.inet_ntoa(struct.pack("I", int_ip))
 
     return dict(convert_to_yuan=convert_to_yuan, get_device_type=get_device_type, int2ip=int2ip)
+
 
 # 显示消息框
 @app.context_processor

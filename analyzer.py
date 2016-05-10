@@ -73,6 +73,7 @@ def __get_speed_comparison_data(history_data, today_data, str_updated_time):
 
     return dict(category=category, value=value)
 
+
 # 最近7天的收入分析
 def __seven_day_pdc(username):
     history_speed = __get_history_speed_data(username)
@@ -118,7 +119,7 @@ def __seven_day_pdc(username):
 
         for key in income_value:
             if len(income_value[key]) <= i:
-                income_value[key] = income_value[key]+[0]
+                income_value[key] = income_value[key] + [0]
 
     series = []
 
@@ -137,6 +138,7 @@ def __seven_day_pdc(username):
         'valueSuffix': ' KB/s'
     }})
     return dict(category=category, series=series)
+
 
 # 历史产量（30天）
 @app.route('/analyzer/last_30_day')
@@ -157,6 +159,7 @@ def analyzer_last_30_day():
         value.append([int(time.mktime(update_date.timetuple()) * 1000), data.get('pdc')])
 
     return Response(json.dumps(dict(value=value)), mimetype='application/json')
+
 
 # 最近7日速度对比
 @app.route('/analyzer/speed_comparison')
@@ -187,6 +190,7 @@ def analyzer_speed_comparison():
 
     return Response(json.dumps(speed_comparison_data), mimetype='application/json')
 
+
 # 最近7日产量图形界面
 @app.route('/analyzer/speed_vs_income')
 @requires_auth
@@ -206,6 +210,7 @@ def analyzer_speed_vs_income():
         data = json.loads(b_data.decode('utf-8'))
 
     return Response(json.dumps(data), mimetype='application/json')
+
 
 # 矿机实时速度的显示时间
 @app.route('/analyzer/speed_stat_chart')
@@ -227,6 +232,7 @@ def analyzer_speed_stat_chart():
     speed_stat_chart = __get_speed_stat_chart_data(today_data.get('speed_stat'))
 
     return Response(json.dumps(speed_stat_chart), mimetype='application/json')
+
 
 # 显示数据分析主界面
 @app.route('/analyzer')

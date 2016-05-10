@@ -35,14 +35,15 @@ def user_login():
 
     if user.get('log_as_body') is not None:
         if len(user.get('log_as_body')) > 0:
-            r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=user.get('log_as_body')))) # 创建新通道,转移原本日记
+            r_session.set('%s:%s' % ('record', username),
+                          json.dumps(dict(diary=user.get('log_as_body'))))  # 创建新通道,转移原本日记
             user['log_as_body'] = []
 
-    user['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S') # 记录登陆时间
-    r_session.set('%s:%s' % ('user', username), json.dumps(user)) # 修正数据
+    user['login_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 记录登陆时间
+    r_session.set('%s:%s' % ('user', username), json.dumps(user))  # 修正数据
 
     if r_session.get('%s:%s' % ('record', username)) is None:
-        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[]))) # 创建缺失的日记
+        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[])))  # 创建缺失的日记
 
     session['user_info'] = user
 
@@ -86,7 +87,6 @@ def public_invitation():
 
 @app.route('/inv_codes', methods=['POST'])
 def public_inv_code():
-
     public_key = 'invitation'
     if r_session.get(public_key) is None:
         r_session.set(public_key, json.dumps(dict(diary=[])))
@@ -134,8 +134,11 @@ def logout():
 
     session.clear()
     return redirect(url_for('login'))
-    
-type_dict = {'0':'','1':'收取','2':'宝箱','3':'转盘','4':'进攻','5':'复仇','6':'提现','7':'状态'}
+
+
+type_dict = {'0': '', '1': '收取', '2': '宝箱', '3': '转盘', '4': '进攻', '5': '复仇', '6': '提现', '7': '状态'}
+
+
 @app.route('/log/<sel_type>')
 @requires_auth
 def user_log(sel_type):
@@ -154,21 +157,20 @@ def user_log(sel_type):
         account_key = 'account:%s:%s' % (user.get('username'), acct.decode("utf-8"))
         account_info = json.loads(r_session.get(account_key).decode("utf-8"))
         if user_info.get('is_show_byname') != True:
-            id_map[account_info.get('user_id')]=account_info.get('username')
+            id_map[account_info.get('user_id')] = account_info.get('username')
         else:
-            id_map[account_info.get('user_id')]=account_info.get('account_name')
+            id_map[account_info.get('user_id')] = account_info.get('account_name')
     for row in record_info.get('diary'):
-        row['id']=id_map.get(row['id'])
+        row['id'] = id_map.get(row['id'])
         if '1day' == request.args.get('time'):
             if (datetime.now() - datetime.strptime(row.get('time'), '%Y-%m-%d %H:%M:%S')).days < 1:
-                if row.get('type').find(str(type_dict.get(sel_type)))!=-1:
+                if row.get('type').find(str(type_dict.get(sel_type))) != -1:
                     log_as.append(row)
         elif 'all' == request.args.get('time'):
-            if row.get('type').find(str(type_dict.get(sel_type)))!=-1: log_as.append(row)
+            if row.get('type').find(str(type_dict.get(sel_type))) != -1: log_as.append(row)
         else:
             if (datetime.now() - datetime.strptime(row.get('time'), '%Y-%m-%d %H:%M:%S')).days < 7:
-                if row.get('type').find(str(type_dict.get(sel_type)))!=-1: log_as.append(row)
-
+                if row.get('type').find(str(type_dict.get(sel_type))) != -1: log_as.append(row)
 
     log_as.reverse()
 
@@ -191,24 +193,24 @@ def user_log_delete():
 
 
 def guest_diary(request, username):
-
     guest_key = 'guest'
     if r_session.get(guest_key) is None:
         r_session.set(guest_key, json.dumps(dict(diary=[])))
     guest_info = json.loads(r_session.get(guest_key).decode('utf-8'))
 
-    guest_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #时间
+    guest_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 时间
 
-    url_scheme = request.environ.get('wsgi.url_scheme') #请求头
-    HTTP_HOST = request.environ.get('HTTP_HOST') #地址
-    PATH_INFO = request.environ.get('PATH_INFO') #后缀
-    REQUEST_METHOD = request.environ.get('REQUEST_METHOD') #方式
-    HTTP_X_REAL_IP = request.environ.get('HTTP_X_REAL_IP') #IP
-    REMOTE_PORT = request.environ.get('REMOTE_PORT') #端口
+    url_scheme = request.environ.get('wsgi.url_scheme')  # 请求头
+    HTTP_HOST = request.environ.get('HTTP_HOST')  # 地址
+    PATH_INFO = request.environ.get('PATH_INFO')  # 后缀
+    REQUEST_METHOD = request.environ.get('REQUEST_METHOD')  # 方式
+    HTTP_X_REAL_IP = request.environ.get('HTTP_X_REAL_IP')  # IP
+    REMOTE_PORT = request.environ.get('REMOTE_PORT')  # 端口
 
-    http = '%s://%s%s' % (url_scheme, HTTP_HOST, PATH_INFO) #链接
+    http = '%s://%s%s' % (url_scheme, HTTP_HOST, PATH_INFO)  # 链接
 
-    body = dict(time=guest_time, http=http, method=REQUEST_METHOD, ip=HTTP_X_REAL_IP, port=REMOTE_PORT, username=username)
+    body = dict(time=guest_time, http=http, method=REQUEST_METHOD, ip=HTTP_X_REAL_IP, port=REMOTE_PORT,
+                username=username)
 
     guest_body = guest_info.get('diary')
     guest_body.append(body)
@@ -270,22 +272,23 @@ def user_turn(field):
     user_key = '%s:%s' % ('user', user.get('username'))
     user_info = json.loads(r_session.get(user_key).decode('utf-8'))
     if field == 'income':
-       if 'auto_column' in user_info.keys():
-           user_info['auto_column'] = True if user_info['auto_column'] == False else False 
-       else:
-           user_info['auto_column'] = True
+        if 'auto_column' in user_info.keys():
+            user_info['auto_column'] = True if user_info['auto_column'] == False else False
+        else:
+            user_info['auto_column'] = True
     elif field == 'speed':
-       if 'is_show_speed_data' in user_info.keys():
-           user_info['is_show_speed_data'] = True if user_info['is_show_speed_data'] == False else False 
-       else:
-           user_info['is_show_speed_data'] = True
+        if 'is_show_speed_data' in user_info.keys():
+            user_info['is_show_speed_data'] = True if user_info['is_show_speed_data'] == False else False
+        else:
+            user_info['is_show_speed_data'] = True
     elif field == 'award':
-       if 'is_show_wpdc' in user_info.keys():
-           user_info['is_show_wpdc'] = (user_info['is_show_wpdc'] + 1) % 3
-       else:
-           user_info['is_show_wpdc'] = 0
+        if 'is_show_wpdc' in user_info.keys():
+            user_info['is_show_wpdc'] = (user_info['is_show_wpdc'] + 1) % 3
+        else:
+            user_info['is_show_wpdc'] = 0
     r_session.set(user_key, json.dumps(user_info))
     return redirect(url_for('dashboard'))
+
 
 @app.route('/user/change_property/<field>/<value>', methods=['POST'])
 @requires_auth
@@ -394,10 +397,10 @@ def register():
         session['info_message'] = None
 
     invitation_code = ''
-    if request.values.get('inv_code') is not None and len(request.values.get('inv_code')) > 0 :
+    if request.values.get('inv_code') is not None and len(request.values.get('inv_code')) > 0:
         invitation_code = request.values.get('inv_code')
 
-    if request.values.get('active') is not None and len(request.values.get('active')) > 0 :
+    if request.values.get('active') is not None and len(request.values.get('active')) > 0:
         active_code = request.values.get('active')
         try:
             validate = base64.b64decode(active_code)
@@ -424,6 +427,7 @@ def register():
         return redirect(url_for('register'))
 
     return render_template('register.html', err_msg=err_msg, info_msg=info_msg, invitation_code=invitation_code)
+
 
 def user_email(email, key):
     from mailsand import send_email
@@ -459,7 +463,8 @@ def user_email(email, key):
     """
     config_key = '%s:%s' % ('user', 'system')
     config_info = json.loads(r_session.get(config_key).decode('utf-8'))
-    return send_email(mail,config_info)
+    return send_email(mail, config_info)
+
 
 @app.route('/user/register', methods=['POST'])
 def user_register():
@@ -515,8 +520,8 @@ def user_register():
                 active=True, is_admin=False, max_account_no=20, email=email,
                 created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-    r_session.setex('emailcode:%s' % email, json.dumps(user.get('created_time')), 60*5)
-    r_session.setex('activecode:%s' % key, json.dumps(user), 60*30)
+    r_session.setex('emailcode:%s' % email, json.dumps(user.get('created_time')), 60 * 5)
+    r_session.setex('activecode:%s' % key, json.dumps(user), 60 * 30)
 
     bytesString = key.encode('utf-8')
     encodestr = base64.b64encode(bytesString)

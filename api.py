@@ -15,18 +15,21 @@ server_address = 'http://2-api-red.xunlei.com'
 agent_header = {'user-agent': "RedCrystal/3.0.0 (Android 4.1)"}
 
 DEBUG_MODE = False
+
+
 # 提交迅雷链接，返回信息
 def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60):
     address = server_address + url
     try:
-        r = requests.post(url=address, data=data, verify=verify, headers=headers, cookies=cookies, timeout=timeout)        
+        r = requests.post(url=address, data=data, verify=verify, headers=headers, cookies=cookies, timeout=timeout)
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
 
-    if r.status_code != 200: 
+    if r.status_code != 200:
         return __handle_exception(rd=r.reason)
 
     return json.loads(r.text)
+
 
 # 申请提现请求
 def exec_draw_cash(cookies, limits=None):
@@ -43,7 +46,7 @@ def exec_draw_cash(cookies, limits=None):
 
     wc_pkg = r.get('wc_pkg')
 
-    if limits is not None and wc_pkg < limits: 
+    if limits is not None and wc_pkg < limits:
         return dict(r=1, rd='帐户金额少于下限值%s元' % limits)
 
     if wc_pkg > 200:
@@ -55,11 +58,13 @@ def exec_draw_cash(cookies, limits=None):
 
     return r
 
+
 # 获取提现信息
 def get_can_drawcash(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
     body = dict(hand='0', v='1', ver='1')
     return api_post(url='/?r=usr/drawcashInfo', data=body, cookies=cookies)
+
 
 # 检测提现余额
 def get_balance_info(cookies):
@@ -67,11 +72,13 @@ def get_balance_info(cookies):
     body = dict(hand='0', v='2', ver='1')
     return api_post(url='/?r=usr/asset', data=body, cookies=cookies)
 
+
 # 提交提现请求
 def draw_cash(cookies, money):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
     body = dict(hand='0', m=str(money), v='3', ver='1')
     return api_post(url='?r=usr/drawpkg', data=body, cookies=cookies)
+
 
 # 获取输入的COOKIES信息
 def get_income_info(cookies):
@@ -79,18 +86,21 @@ def get_income_info(cookies):
     body = dict(hand='0', v='1', ver='1')
     return api_post(url='/?r=usr/getinfo&v=1', data=body, cookies=cookies)
 
+
 # 获取MINE信息
 def get_mine_info(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='4', appversion=appversion)
     return api_post(url='/?r=mine/info', data=body, cookies=cookies)
 
+
 # 获取速度状态
 def get_speed_stat(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
     body = dict(type='1', hand='0', v='0', ver='1')
     try:
-        r = requests.post(server_address + '/?r=mine/speed_stat', data=body, verify=False, cookies=cookies, headers=agent_header, timeout=60)
+        r = requests.post(server_address + '/?r=mine/speed_stat', data=body, verify=False, cookies=cookies,
+                          headers=agent_header, timeout=60)
     except requests.exceptions.RequestException as e:
         __handle_exception(e=e)
         return [0] * 24
@@ -101,11 +111,13 @@ def get_speed_stat(cookies):
 
     return json.loads(r.text).get('sds')
 
+
 # 获取个人信息
 def get_privilege(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='1', ver='6')
     return api_post(url='/?r=usr/privilege', data=body, cookies=cookies)
+
 
 # 获取设备状态
 def get_device_stat(s_type, cookies):
@@ -113,16 +125,19 @@ def get_device_stat(s_type, cookies):
     body = dict(type=s_type, hand='0', v='2', ver='1')
     return api_post(url='/?r=mine/devices_stat', data=body, cookies=cookies)
 
+
 def get_produce_stat(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(r='mine/produce_stat')
     return api_post(url="/index.php", data=body, cookies=cookies)
-    
+
+
 # 提交收集水晶请求
 def collect(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(hand='0', v='2', ver='1')
     return api_post(url='/index.php?r=mine/collect', data=body, cookies=cookies)
+
 
 # 获取宝箱信息
 def api_giftbox(cookies):
@@ -130,11 +145,13 @@ def api_giftbox(cookies):
     body = dict(tp='0', p='0', ps='60', t='', v='2', cmid='-1')
     return api_post(url='/?r=usr/giftbox', data=body, cookies=cookies)
 
+
 # 提交打开宝箱请求
 def api_openStone(cookies, giftbox_id, direction):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='1', id=str(giftbox_id), side=direction)
     return api_post(url='/?r=usr/openStone', data=body, cookies=cookies)
+
 
 # 提交放弃宝箱请求
 def api_giveUpGift(cookies, giftbox_id):
@@ -142,11 +159,13 @@ def api_giveUpGift(cookies, giftbox_id):
     body = dict(v='2', id=str(giftbox_id), tag='0')
     return api_post(url='/?r=usr/giveUpGift', data=body, cookies=cookies)
 
+
 # 获取幸运转盘信息
 def api_getconfig(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '2'
     body = dict(v='2')
     return api_post(url='/?r=turntable/getconfig', data=body, cookies=cookies)
+
 
 # 提交幸运转盘请求
 def api_getaward(cookies):
@@ -154,11 +173,13 @@ def api_getaward(cookies):
     body = dict(v='2')
     return api_post(url='/?r=turntable/getaward', data=body, cookies=cookies)
 
+
 # 获取秘银进攻信息
 def api_sys_getEntry(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='6')
     return api_post(url='/?r=sys/getEntry', data=body, cookies=cookies)
+
 
 # 获取秘银复仇信息
 def api_steal_stolenSilverHistory(cookies):
@@ -166,11 +187,13 @@ def api_steal_stolenSilverHistory(cookies):
     body = dict(v='2')
     return api_post(url='/?r=steal/stolenSilverHistory', data=body, cookies=cookies)
 
+
 # 提交秘银进攻请求
 def api_steal_search(cookies, searcht_id=0):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='2', sid=str(searcht_id))
     return api_post(url='/?r=steal/search', data=body, cookies=cookies)
+
 
 # 提交收集秘银请求
 def api_steal_collect(cookies, searcht_id):
@@ -178,15 +201,18 @@ def api_steal_collect(cookies, searcht_id):
     body = dict(sid=str(searcht_id), cmid='-2', v='2')
     return api_post(url='/?r=steal/collect', data=body, cookies=cookies)
 
+
 # 提交进攻结果请求
 def api_steal_summary(cookies, searcht_id):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='2', sid=str(searcht_id))
     return api_post(url='/?r=steal/summary', data=body, cookies=cookies)
 
+
 # 获取星域存储相关信息
 def ubus_cd(session_id, account_id, action, out_params, url_param=None):
-    url = "http://kjapi.peiluyou.com:5171/ubus_cd?account_id=%s&session_id=%s&action=%s" % (account_id, session_id, action)
+    url = "http://kjapi.peiluyou.com:5171/ubus_cd?account_id=%s&session_id=%s&action=%s" % (
+    account_id, session_id, action)
     if url_param is not None:
         url += url_param
 
@@ -198,11 +224,12 @@ def ubus_cd(session_id, account_id, action, out_params, url_param=None):
         s = requests.Session()
         s.mount('http://', HTTPAdapter(max_retries=5))
         r = s.post(url, data=body)
-        result = r.text[r.text.index('{'):r.text.rindex('}')+1]
+        result = r.text[r.text.index('{'):r.text.rindex('}') + 1]
         return json.loads(result)
 
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
+
 
 def check_award_income(r):
     crystal_pattern = re.compile('.*抽中([0-9]+).*水晶.*')
@@ -210,6 +237,7 @@ def check_award_income(r):
     if crystal_match:
         return int(crystal_match.group(1))
     return 0
+
 
 # 发送设置链接
 def parse_setting_url(url):
@@ -220,12 +248,14 @@ def parse_setting_url(url):
     account_id = query_s['user_id'][0]
     return device_id, session_id, account_id
 
+
 # 检测是否API错误
 def is_api_error(r):
     if r.get('r') == -12345:
         return True
 
     return False
+
 
 # 接口故障
 def __handle_exception(e=None, rd='接口故障', r=-12345):

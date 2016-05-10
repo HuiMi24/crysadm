@@ -8,6 +8,7 @@ from util import md5
 from login import login
 from datetime import datetime
 
+
 # 显示所有绑定的迅雷会员帐号
 @app.route('/accounts')
 @requires_auth
@@ -27,6 +28,7 @@ def accounts():
         account_s.append(account_info)
 
     return render_template('accounts.html', err_msg=err_msg, accounts=account_s)
+
 
 # 绑定一个新的迅雷会员帐号
 @app.route('/account/add', methods=['POST'])
@@ -76,6 +78,7 @@ def account_add():
 
     return redirect(url_for('accounts'))
 
+
 # 删除绑定的迅雷会员帐号
 @app.route('/account/del/<xl_id>', methods=['POST'])
 @requires_auth
@@ -83,11 +86,12 @@ def account_del(xl_id):
     user = session.get('user_info')
     accounts_key = 'accounts:%s' % user.get('username')
     account_key = 'account:%s:%s' % (user.get('username'), xl_id)
-    account_data_key = account_key+':data'
+    account_data_key = account_key + ':data'
     r_session.srem(accounts_key, xl_id)
     r_session.delete(account_key)
     r_session.delete(account_data_key)
     return redirect(url_for('accounts'))
+
 
 # 停止一个已经绑定的迅雷会员帐号
 @app.route('/account/inactive/<xl_id>', methods=['POST'])
@@ -102,6 +106,7 @@ def account_inactive(xl_id):
 
     return redirect(url_for('accounts'))
 
+
 # 激活一个已经停止的迅雷会员帐号
 @app.route('/account/active/<xl_id>', methods=['POST'])
 @requires_auth
@@ -114,6 +119,7 @@ def account_activel(xl_id):
     r_session.set(account_key, json.dumps(account_info))
 
     return redirect(url_for('accounts'))
+
 
 # 停止所有已经绑定的迅雷会员帐号
 @app.route('/accounts/inactive_all', methods=['POST'])
@@ -129,6 +135,7 @@ def account_inactive_all():
         r_session.set(account_key, json.dumps(account_info))
 
     return redirect(url_for('accounts'))
+
 
 # 激活所有已经停止的迅雷会员帐号
 @app.route('/accounts/active_all', methods=['POST'])

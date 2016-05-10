@@ -7,6 +7,7 @@ from flask import Response, request, session, redirect, url_for
 from functools import wraps
 from crysadm import r_session
 
+
 # 需要管理员权限
 def requires_admin(f):
     @wraps(f)
@@ -20,6 +21,7 @@ def requires_admin(f):
 
     return decorated
 
+
 # 需要用户权限
 def requires_auth(f):
     @wraps(f)
@@ -30,6 +32,7 @@ def requires_auth(f):
         return f(*args, **kwargs)
 
     return decorated
+
 
 def __handshake():
     user = session.get('user_info')

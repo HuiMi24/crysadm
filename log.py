@@ -1,9 +1,9 @@
-
 from flask import render_template, session, Response, redirect, url_for
 from crysadm import app, r_session
 from auth import requires_auth
 from datetime import datetime, timedelta
 import json
+
 
 @app.route('/log')
 @requires_auth

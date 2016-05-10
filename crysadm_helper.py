@@ -1,34 +1,24 @@
 __author__ = 'powergx'
 import config, socket, redis
-import time
 from login import login
 from datetime import datetime, timedelta
 from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
-import random
-from urllib.parse import urlparse, parse_qs, unquote
-import sys
+from api import *
+import logging
 
-conf = None
-if socket.gethostname() == 'GXMBP.local':
-    conf = config.DevelopmentConfig
-elif socket.gethostname() == 'iZ23bo17lpkZ':
-    conf = config.ProductionConfig
-else:
-    conf = config.TestingConfig
+
+conf = config.TestingConfig
 
 redis_conf = conf.REDIS_CONF
 pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)
 
-from api import *
-
 
 # 获取用户数据
 def get_data(username):
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_data')
+    logging.debug('get %s data' % username)
 
     start_time = datetime.now()
     try:
@@ -43,10 +33,10 @@ def get_data(username):
                 record_info = dict(diary=[])
                 r_session.set(record_key, json.dumps(record_info))
 
-            if not account_info.get('active'): continue
+            if not account_info.get('active'):
+                continue
 
-            if DEBUG_MODE:
-                print("start get_data with userID:", user_id)
+            logging.debug('start get data with user id %s ' % user_id)
 
             session_id = account_info.get('session_id')
             user_id = account_info.get('user_id')
@@ -54,8 +44,9 @@ def get_data(username):
 
             mine_info = get_mine_info(cookies)
             if is_api_error(mine_info):
-                if DEBUG_MODE:
-                    print('get_data:', user_id, mine_info, 'error')
+                logging.debug('get data %s error#' % user_id)
+                #if DEBUG_MODE:
+                #    print('get_data:', user_id, mine_info, 'error')
                 return
 
             if mine_info.get('r') != 0:
@@ -63,6 +54,7 @@ def get_data(username):
                 success, account_info = __relogin(account_info.get('account_name'), account_info.get('password'),
                                                   account_info, account_key)
                 if not success:
+                    logging.debug('%s re-login failed' % user_id)
                     print('get_data:', user_id, 'relogin failed')
                     continue
                 session_id = account_info.get('session_id')
@@ -71,7 +63,8 @@ def get_data(username):
                 mine_info = get_mine_info(cookies)
 
             if mine_info.get('r') != 0:
-                print('get_data:', user_id, mine_info, 'error')
+                logging.debug('get mime info %s error#' % user_id)
+                #print('get_data:', user_id, mine_info, 'error')
                 continue
 
             device_info = ubus_cd(session_id, user_id, 'get_devices', ["server", "get_devices", {}])
@@ -99,7 +92,8 @@ def get_data(username):
             account_data['produce_info'] = get_produce_stat(cookies)
 
             if is_api_error(account_data.get('income')):
-                print('get_data:', user_id, 'income', 'error')
+                logging.debug('get income %s error#' % user_id)
+                #print('get_data:', user_id, 'income', 'error')
                 return
 
             r_session.set(account_data_key, json.dumps(account_data))
@@ -113,15 +107,18 @@ def get_data(username):
 
         r_session.setex('user:%s:cron_queued' % username, '1', 60)
         if DEBUG_MODE:
-            print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')
+            logging.debug('get data user %s successed#' % username)
+            #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')
     except Exception as ex:
+        logging.debug('get data user %s failed##' % username)
         print(username.encode('utf-8'), 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ex)
 
 
 # 保存历史数据
 def save_history(username):
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'save_history')
+    #
+    #if DEBUG_MODE:
+    #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'save_history')
     str_today = datetime.now().strftime('%Y-%m-%d')
     key = 'user_data:%s:%s' % (username, str_today)
     b_today_data = r_session.get(key)
@@ -151,7 +148,7 @@ def save_history(username):
         data = json.loads(b_data.decode('utf-8'))
 
         if datetime.strptime(data.get('updated_time'), '%Y-%m-%d %H:%M:%S') + timedelta(minutes=1) < datetime.now() or \
-                        datetime.strptime(data.get('updated_time'), '%Y-%m-%d %H:%M:%S').day != datetime.now().day:
+                             datetime.strptime(data.get('updated_time'), '%Y-%m-%d %H:%M:%S').day != datetime.now().day:
             continue
         today_data.get('speed_stat').append(dict(mid=data.get('privilege').get('mid'),
                                                  dev_speed=data.get('zqb_speed_stat') if data.get(
@@ -172,25 +169,15 @@ def save_history(username):
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
-            # current_space_used = device.get('dcdn_clients')[0].get('space_used')
-            # if today_data.get('space') is None:
-            #    today_data['space'] = []
-            # else:
-            #    for saved_device in today_data['space']:
-            #        if saved_device.get('space_used') is not None\
-            #        and saved_device.get('device_id') == device.get('device_id')\
-            #        and saved_device.get('space_used') > current_space_used:
-            #            deleted_space = (saved_device.get('space_used') - current_space_used)/1024/1024/1024
-            #            red_log(user, '迅雷', '删除缓存', '矿机 %s 被删除缓存 %.3fG' % device.get('device_name'), deleted_space)
-            # today_data['space'].append(dict(space_used=current_space_used, device_id=device.get('device_id')))
     r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
     save_income_history(username, today_data.get('pdc_detail'))
 
 
 # 获取保存的历史数据
 def save_income_history(username, pdc_detail):
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'save_income_history')
+    #
+    #if DEBUG_MODE:
+    #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'save_income_history')
     now = datetime.now()
     key = 'user_data:%s:%s' % (username, 'income.history')
     b_income_history = r_session.get(key)
@@ -212,8 +199,9 @@ def save_income_history(username, pdc_detail):
 
 # 重新登录
 def __relogin(username, password, account_info, account_key):
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
+    logging.debug('')#
+    #if DEBUG_MODE:
+    #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
 
     login_result = login(username, password, conf.ENCRYPT_PWD_URL)
 
@@ -231,8 +219,9 @@ def __relogin(username, password, account_info, account_key):
 
 # 获取在线用户数据
 def get_online_user_data():
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
+    logging.debug('')#
+    #if DEBUG_MODE:
+    #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'): return
 
     pool = ThreadPool(processes=1)
@@ -244,8 +233,9 @@ def get_online_user_data():
 
 # 获取离线用户数据
 def get_offline_user_data():
-    if DEBUG_MODE:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
+    logging.debug('')
+    #if DEBUG_MODE:
+    #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'): return
     if datetime.now().minute < 50: return
 

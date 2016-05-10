@@ -1,3 +1,1 @@
-Fork from https://git.airl.us/powergx/crysadm
-
-欢迎大家一起来修改
+现在打算重构部分代码，如果大家发现bug或者想要什么功能欢迎留言，更欢迎直接提交代码

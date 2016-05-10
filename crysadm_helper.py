@@ -18,7 +18,7 @@ r_session = redis.Redis(connection_pool=pool)
 
 # 获取用户数据
 def get_data(username):
-    logging.debug('get %s data' % username)
+    config.crys_log('get %s data' % username)
 
     start_time = datetime.now()
     try:
@@ -36,7 +36,7 @@ def get_data(username):
             if not account_info.get('active'):
                 continue
 
-            logging.debug('start get data with user id %s ' % user_id)
+            config.crys_log('start get data with user id %s ' % user_id)
 
             session_id = account_info.get('session_id')
             user_id = account_info.get('user_id')
@@ -44,7 +44,7 @@ def get_data(username):
 
             mine_info = get_mine_info(cookies)
             if is_api_error(mine_info):
-                logging.debug('get data %s error#' % user_id)
+                config.crys_log('get data %s error#' % user_id)
                 #if DEBUG_MODE:
                 #    print('get_data:', user_id, mine_info, 'error')
                 return
@@ -54,7 +54,7 @@ def get_data(username):
                 success, account_info = __relogin(account_info.get('account_name'), account_info.get('password'),
                                                   account_info, account_key)
                 if not success:
-                    logging.debug('%s re-login failed' % user_id)
+                    config.crys_log('%s re-login failed' % user_id)
                     print('get_data:', user_id, 'relogin failed')
                     continue
                 session_id = account_info.get('session_id')
@@ -63,7 +63,7 @@ def get_data(username):
                 mine_info = get_mine_info(cookies)
 
             if mine_info.get('r') != 0:
-                logging.debug('get mime info %s error#' % user_id)
+                config.crys_log('get mime info %s error#' % user_id)
                 #print('get_data:', user_id, mine_info, 'error')
                 continue
 
@@ -92,7 +92,7 @@ def get_data(username):
             account_data['produce_info'] = get_produce_stat(cookies)
 
             if is_api_error(account_data.get('income')):
-                logging.debug('get income %s error#' % user_id)
+                config.crys_log('get income %s error#' % user_id)
                 #print('get_data:', user_id, 'income', 'error')
                 return
 
@@ -107,10 +107,10 @@ def get_data(username):
 
         r_session.setex('user:%s:cron_queued' % username, '1', 60)
         if DEBUG_MODE:
-            logging.debug('get data user %s successed#' % username)
+            config.crys_log('get data user %s successed#' % username)
             #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')
     except Exception as ex:
-        logging.debug('get data user %s failed##' % username)
+        config.crys_log('get data user %s failed##' % username)
         print(username.encode('utf-8'), 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ex)
 
 
@@ -199,7 +199,7 @@ def save_income_history(username, pdc_detail):
 
 # 重新登录
 def __relogin(username, password, account_info, account_key):
-    logging.debug('')#
+    config.crys_log('')#
     #if DEBUG_MODE:
     #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
 
@@ -219,7 +219,7 @@ def __relogin(username, password, account_info, account_key):
 
 # 获取在线用户数据
 def get_online_user_data():
-    logging.debug('')#
+    config.crys_log('')#
     #if DEBUG_MODE:
     #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'): return
@@ -233,7 +233,7 @@ def get_online_user_data():
 
 # 获取离线用户数据
 def get_offline_user_data():
-    logging.debug('')
+    config.crys_log('')
     #if DEBUG_MODE:
     #    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'): return

@@ -6,8 +6,23 @@ __author__ = 'powergx'
 import logging
 
 LOG_FILENAME = '/tmp/error'
-logging.basicConfig(filename=LOG_FILENAME, format='[%(asctime)s] %(levelname)s %(funcName)s %(lineno)d: %(message)s', level=logging.DEBUG)
-logging.debug("This is a debug message")
+
+logging.basicConfig(level=logging.DEBUG)
+def crys_log(message):
+    """Automatically log the current function details."""
+    import inspect, logging
+    # Get the previous frame in the stack, otherwise it would
+    # be this function!!!
+    func = inspect.currentframe().f_back.f_code
+    # Dump the message + the name of this function to the log.
+    logging.debug("%s: %s in %s:%i" % (
+        message,
+        func.co_name,
+        func.co_filename,
+        func.co_firstlineno
+    ))
+
+crys_log("This is a debug message")
 
 class RedisConfig():
     def __init__(self, host, port, db, password=None):

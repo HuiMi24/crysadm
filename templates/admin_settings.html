@@ -16,8 +16,14 @@
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content">
-                        <div class="tab-pane fade active in" id="auto_task">
-                            <br>
+                        <div class="tab-pane fade {% if action is none or action == 'auto_task' %}active in{% endif %}" id="auto_task">
+                            <br />
+                            {% if err_msg and (action == 'auto_task') %}
+                                <div class="alert alert-danger alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    {{ err_msg }}
+                                </div>
+                            {% endif %}
                             <form role="form" action="/admin/change_property/collect_crystal_interval/1/system" method="post">
                                 <div class="form-group input-group">
                                     <span class="input-group-addon"><i style="width: 16px;" class="fa fa-dashcube"></i></span>
@@ -119,7 +125,13 @@
                             </form>
                         </div>
                         <div class="tab-pane fade{% if action == 'info' %} active in{% endif %}" id="info">
-                            <br>
+                            <br />
+                            {% if err_msg and (action == 'info') %}
+                                <div class="alert alert-danger alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    {{ err_msg }}
+                                </div>
+                            {% endif %}
                             <form role="form" action="/admin/change_property/master_mail_smtp/1/system" method="post">
                                 <div class="form-group input-group">
                                     <span class="input-group-addon"><i style="width: 16px;" class="fa fa-dashcube"></i></span>
@@ -147,6 +159,18 @@
                                     </span>
                                 </div>
                             </form>
+                            <form role="form" action="/admin/test_email" method="post">
+                                <div class="form-group input-group">
+                                     <span class="input-group-addon"><i style="width: 16px;" class="fa fa-wrench"></i></span>
+                                    <input class="form-control" value="发送一个测试邮件到您的提醒邮件地址，以测试邮件设置是否正常" disabled>
+
+                                        <span class="input-group-btn" style="padding-top: 0px;padding-bottom: 0px;">
+                                        <button type="submit" class="btn btn-success" style="text-align:left; width: 140px;">发送测试邮件</button>
+                                        </span>
+
+                                </div>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -159,13 +183,13 @@
 
 {% block navibar %}
     <div class="col-lg-10">
-        <h2>我的账户管理</h2>
+        <h2>参数配置</h2>
         <ol class="breadcrumb">
             <li>
                 <a href="/">Home</a>
             </li>
             <li class="active">
-                <strong>Profile</strong>
+                <strong>Setting</strong>
             </li>
         </ol>
     </div>

@@ -3,7 +3,6 @@ import hashlib
 from flask import session
 
 
-# ����hash����
 def hash_password(pwd):
     """
         :param pwd: input password
@@ -14,14 +13,16 @@ def hash_password(pwd):
     return hashlib.md5(str("%s%s" % (app.config.get("PASSWORD_PREFIX"), pwd)).encode('utf-8')).hexdigest()
 
 
-# ���� md5 16λСд����
 def md5(s):
     import hashlib
 
     return hashlib.md5(s.encode('utf-8')).hexdigest().lower()
 
+def sha1(s):
+    import hashlib
 
-# ��ȡ������Ϣ
+    return hashlib.sha1(s.encode('utf-8')).hexdigest().lower()
+
 def get_message():
     err_msg = None
     if session.get('error_message') is not None:
@@ -29,9 +30,7 @@ def get_message():
         session['error_message'] = None
     return err_msg
 
-
-# ������Ϣ
-def set_message(message, type='error'):
+def set_message(message,type='error'):
     if type == 'error':
         session['error_message'] = message
     elif type == 'info':

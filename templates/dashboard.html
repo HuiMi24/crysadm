@@ -18,14 +18,13 @@
 {% block content %}
 
     <div class="row">    
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-4 col-xs-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <span class="label label-success pull-right" style="padding-top: 5px;">实时</span>
                     <h5>上传速度</h5>
                 </div>
-                <div class="ibox-content" style="height: 88px;">
-
+                <div class="ibox-content">
                     <div class="row">
                         <div class="col-xs-3">
                             <i class="fa fa-arrow-circle-up fa-4x"></i>
@@ -39,7 +38,7 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-4 col-xs-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <span class="label label-success pull-right" style="padding-top: 5px;">实时</span>
@@ -59,100 +58,104 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-4 col-xs-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
-                    <h5>水晶产量</h5>
+                    <h5>矿场产量</h5>
                 </div>
                 <div class="ibox-content" style="height: 88px;">
-
                     <div class="row">
                         <div class="col-xs-3">
                             <i class="fa fa-rmb fa-4x"></i>
                         </div>
                         <div class="col-xs-9 text-right" style="padding-left: 5px;">
-                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="pdc"></h1>
+                            <h1 style="font-size: 33px; font-weight: bold;" class="no-margins" id="pdc"></h1>
+                            <small style=" font-weight: bold;"><span id="pdc_unit"></span></small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
-                    <h5>宝箱收益</h5>
-                </div>
-                <div class="ibox-content" style="height: 88px;">
-
-                    <div class="row">
-                        <div class="col-xs-12 text-right" style="padding-left: 5px;">
-                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="giftbox_pdc"></h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> 
-
-        <div class="col-lg-3 col-md-6">
-            <div class="ibox float-e-margins">
-                <div class="ibox-title">
-                    <span class="label label-info pull-right" style="padding-top: 5px;">今日</span>
-                    <h5>转盘收益</h5>
-                </div>
-                <div class="ibox-content" style="height: 88px;">
-
-                    <div class="row">
-                        <div class="col-xs-12 text-right" style="padding-left: 5px;">
-                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="award_income"></h1>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div > 
-      
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-4 col-xs-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <span class="label label-primary pull-right" style="padding-top: 5px;">本周</span>
-                    <h5>水晶产量</h5>
+                    <h5>水晶收益</h5>
+                </div>
+                <div class="ibox-content" style="height: 88px;">
+
+                    <div class="row">
+                        <div class="col-xs-12 text-right" style="padding-left: 5px;">
+                            <h1 style="font-size: 33px; font-weight: bold;" class="no-margins" id="w_pdc"></h1>
+                            <small style=" font-weight: bold;"><span id="w_pdc_unit"></span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div >
+
+        <div class="col-lg-3 col-md-4 col-xs-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <span class="label label-danger pull-right" style="padding-top: 5px;">本月</span>
+                    <h5>水晶收益</h5>
                 </div>
                 <div class="ibox-content" style="height: 88px;">
                     <div class="row">
                         <div class="col-xs-12 text-right" style="padding-left: 5px;">
-                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="w_pdc"></h1>
+                            <h1 style="font-size: 33px; font-weight: bold;" class="no-margins" id="m_pdc"></h1>
+                            <small style=" font-weight: bold;"><span id="m_pdc_unit"></span></small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6">
+        <div class="col-lg-3 col-md-4 col-xs-6">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <span class="label label-danger pull-right" style="padding-top: 5px;">本月</span>
-                    <h5>水晶产量</h5>
+                    <form role="form" action="/user/turnaward" method="post">
+                    {% if user_info.is_show_wpdc == 0 %}
+                        <button class="label label-info pull-right" style="padding-top: 5px;border:none;">今日</button>
+                    {% elif user_info.is_show_wpdc == 1 %}
+                        <button class="label label-primary pull-right" style="padding-top: 5px;border:none;">本周</button>
+                    {% else %}
+                        <button class="label label-danger pull-right" style="padding-top: 5px;border:none;">本月</button>
+                    {% endif %}
+                    </form>
+                    <h5>宝箱转盘</h5>
                 </div>
                 <div class="ibox-content" style="height: 88px;">
+
                     <div class="row">
                         <div class="col-xs-12 text-right" style="padding-left: 5px;">
-                            <h1 style="font-size: 44px; font-weight: bold;" class="no-margins" id="m_pdc"></h1>
+                            <h1 style="font-size: 33px; font-weight: bold;" class="no-margins" id="w_award_income"></h1>
+                            <small style=" font-weight: bold;"><span id="w_award_income_unit"></span></small>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
+
     </div>
     <div class="row">
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    {% if user_info.auto_column %}
-                        <h5>同比产量 (迅雷统计)</h5>
-                    {% else %}
+                    {% if user_info.auto_column != True %}
                         <h5>同比产量 (默认统计)</h5>
+                    {% else %}
+                        <h5>同比产量 (迅雷统计)</h5>
+                    {% endif %}
+                    <form style="float:left;margin-left: 5px;margin-top: -3px;" role="form" action="/user/turnincome" method="post">
+                        <button type="submit" class="btn btn-outline btn-default btn-xs">切换</button>
+                    </form>
+                    {% if user_info.auto_column == True %}
+                        <form style="float:left;margin-left: 5px;margin-top: -3px;" role="form" action="/user/turnspeed" method="post">
+                            <button type="submit" class="btn btn-outline btn-default btn-xs">{% if user_info.is_show_speed_data != True %}关闭{% else %}打开{% endif %}速度条</button>
+                        </form>
                     {% endif %}
                 </div>
                 <div class="ibox-content">
@@ -268,12 +271,12 @@
     <script>
         function convert_to_yuan(crystal_values) {
             if (crystal_values >= 10000) {
-                return parseInt(crystal_values / 1000) / 10 + '元';
+                return parseInt(crystal_values / 1000) / 10;
             }
             if (crystal_values >= 1000) {
-                return parseInt(crystal_values / 100) / 100 + '元';
+                return parseInt(crystal_values / 100) / 100;
             }
-            return crystal_values + '个';
+            return crystal_values;
         }
         function convert_speed(speed) {
             if (speed >= 1024) {
@@ -492,7 +495,7 @@
                         x: -20 //center
                     },
                     xAxis: {
-                        categories: ["01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "24:00"]
+                        categories: ["00-01", "01-02", "02-03", "03-04", "04-05", "05-06", "06-07", "07-08", "08-09", "09-10", "10-11", "11-12", "12-13", "13-14", "14-15", "15-16", "16-17", "17-18", "18-19", "19-20", "20-21", "21-22", "22-23", "23-24"]
                     },
                     yAxis: {
                         min: 0,
@@ -604,42 +607,58 @@
                 if($('#live_speed').html() !== convert_speed(data.today_data.last_speed)){
                     $('#live_speed').html(convert_speed(data.today_data.last_speed));
 
-                    if(data.today_data.last_speed < 1024){
-                        $('#speed_unit').html('K')
-                    }else{
+                    if(data.today_data.last_speed >= 1024){
                         $('#speed_unit').html('M')
+                    }else{
+                        $('#speed_unit').html('K')
                     }
                     flash_element($('#live_speed'));
                 }
                 if($('#down_speed').html() !== convert_speed(data.today_data.deploy_speed)){
                     $('#down_speed').html(convert_speed(data.today_data.deploy_speed));
 
-                    if(data.today_data.deploy_speed < 1024){
-                        $('#speed2_unit').html('K')
-                    }else{
+                    if(data.today_data.deploy_speed >= 1024){
                         $('#speed2_unit').html('M')
+                    }else{
+                        $('#speed2_unit').html('K')
                     }
                     flash_element($('#down_speed'));
                 }
                 if($('#pdc').html() !== convert_to_yuan(data.today_data.pdc)) {
                     $('#pdc').html(convert_to_yuan(data.today_data.pdc));
+                    if(data.today_data.pdc >= 1000){
+                        $('#pdc_unit').html('元')
+                    }else{
+                        $('#pdc_unit').html('个')
+                    }
                     flash_element($('#pdc'));
-                }
-                if($('#w_pdc').html() !== convert_to_yuan(data.today_data.w_pdc)) {
-                    $('#w_pdc').html(convert_to_yuan(data.today_data.w_pdc));
-                    flash_element($('#w_pdc'));
                 }
                 if($('#m_pdc').html() !== convert_to_yuan(data.today_data.m_pdc)) {
                     $('#m_pdc').html(convert_to_yuan(data.today_data.m_pdc));
+                    if(data.today_data.m_pdc >= 1000){
+                        $('#m_pdc_unit').html('元')
+                    }else{
+                        $('#m_pdc_unit').html('个')
+                    }
                     flash_element($('#m_pdc'));
                 }
-                if($('#giftbox_pdc').html() !== convert_to_yuan(data.today_data.giftbox_pdc)) {
-                    $('#giftbox_pdc').html(convert_to_yuan(data.today_data.giftbox_pdc));
-                    flash_element($('#giftbox_pdc'));
+                if($('#w_pdc').html() !== convert_to_yuan(data.today_data.w_pdc)) {
+                    $('#w_pdc').html(convert_to_yuan(data.today_data.w_pdc));
+                    if(data.today_data.w_pdc >= 1000){
+                        $('#w_pdc_unit').html('元')
+                    }else{
+                        $('#w_pdc_unit').html('个')
+                    }
+                    flash_element($('#w_pdc'));
                 }
-                if($('#award_income').html() !== convert_to_yuan(data.today_data.award_income)) {
-                    $('#award_income').html(convert_to_yuan(data.today_data.award_income));
-                    flash_element($('#award_income'));
+                if($('#w_award_income').html() !== convert_to_yuan(data.today_data.w_award_income)) {
+                    $('#w_award_income').html(convert_to_yuan(data.today_data.w_award_income));
+                    if(data.today_data.w_award_income >= 1000){
+                        $('#w_award_income_unit').html('元')
+                    }else{
+                        $('#w_award_income_unit').html('个')
+                    }
+                    flash_element($('#w_award_income'));
                 }
 
             })
@@ -654,8 +673,8 @@
             $('#real_time_speed').highcharts().series[0].addPoint([(new Date()).getTime(),0], true, true);
             reload_data();
             reload_data_ten_minutes();
-            setInterval(reload_data_ten_minutes,60*1000);
-            setInterval(reload_data,15000);
+            setInterval(reload_data_ten_minutes,60*1000*10);
+            setInterval(reload_data,30000);
 
         });
 

@@ -60,21 +60,21 @@ def red_log(clas, type, id, gets):
     user = session.get('user_info')
 
     record_key = '%s:%s' % ('record', user.get('username'))
-    if r_session.get(record_key) is None:
-        record_info = dict(diary=[])
-    else:
-        record_info = json.loads(r_session.get(record_key).decode('utf-8'))
+    record_info = json.loads(r_session.get(record_key).decode('utf-8'))
 
     log_as_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     body = dict(time=log_as_time, clas=clas, type=type, id=id, gets=gets)
 
     log_as_body = record_info.get('diary')
-    log_as_body.append(body)
+    log_trimed = []
+    for item in log_as_body:
+       if (datetime.now() - datetime.strptime(item.get('time'), '%Y-%m-%d %H:%M:%S')).days < 31:
+           log_trimed.append(item)
+    log_trimed.append(body)
 
-    record_info['diary'] = log_as_body
+    record_info['diary'] = log_trimed
 
-    r_session.set(record_key, json.dumps(record_info), 3600 * 24)
-
+    r_session.set(record_key, json.dumps(record_info))
 
 # 收取水晶[id]
 @app.route('/collect/<user_id>', methods=['POST'])
@@ -194,8 +194,7 @@ def getaward_all():
             error_message += 'Id:%s : %s<br />' % (user_id, r.get('rd'))
             red_log('手动执行', '转盘', user_id, r.get('rd'))
         else:
-            success_message += 'Id:%s : 获得:%s  下次转需要:%s 秘银.<br />' % (
-            user_id, regular_html(r.get('tip')), r.get('cost'))
+            success_message += 'Id:%s : 获得:%s  下次转需要:%s 秘银.<br />' % (user_id, regular_html(r.get('tip')), r.get('cost'))
             red_log('手动执行', '转盘', user_id, '获得:%s' % regular_html(r.get('tip')))
             account_data_key = account_key + ':data'
             account_data_value = json.loads(r_session.get(account_data_key).decode("utf-8"))
@@ -472,5 +471,4 @@ def admin_device():
 
     dev = ubus_cd(session_id, account_id, 'get_device', ["server", "get_device", {"device_id": device_id}])
 
-    return render_template('excavators_info.html', action=action, device_id=device_id, session_id=session_id,
-                           account_id=account_id, dev=dev)
+    return render_template('excavators_info.html', action=action, device_id=device_id, session_id=session_id, account_id=account_id, dev=dev)

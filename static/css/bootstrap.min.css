@@ -4502,7 +4502,7 @@ a.list-group-item-danger.active,a.list-group-item-danger.active:focus,a.list-gro
 	padding:10px 15px;
 	border-bottom:1px solid transparent;
 	border-top-left-radius:3px;
-	border-top-right-radius:3px
+	border-top-right-radius:3px;
 }
 .panel-heading>.dropdown .dropdown-toggle {
 	color:inherit

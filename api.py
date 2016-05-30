@@ -14,6 +14,8 @@ appversion = '3.1.1'
 server_address = 'http://2-api-red.xunlei.com'
 agent_header = {'user-agent': "RedCrystal/3.0.0 (iPhone; iOS 9.9; Scale/2.00)"}
 
+DEBUG_MODE = True
+
 # 负载均衡
 def api_proxies():
     return {}

@@ -27,12 +27,6 @@ def get_data(username):
             account_key = 'account:%s:%s' % (username, user_id.decode('utf-8'))
             account_info = json.loads(r_session.get(account_key).decode('utf-8'))
 
-            # clean the log everyday
-            record_key = '%s:%s' % ('record', username)
-            if start_time.hour == 23 and start_time.minute >= 55:
-                record_info = dict(diary=[])
-                r_session.set(record_key, json.dumps(record_info))
-
             if not account_info.get('active'):
                 continue
 

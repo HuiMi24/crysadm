@@ -6,8 +6,6 @@ from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
 from api import *
-import logging
-
 
 conf = config.TestingConfig
 

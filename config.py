@@ -3,15 +3,13 @@
 # config.py - configuration for crysadm web and redis server
 __author__ = 'powergx'
 
-import logging
-
-LOG_FILENAME = '/tmp/error'
-
+DEBUG_MODE = True
 def crys_log(message):
     """Automatically log the current function details."""
-    import inspect, logging
-    print(message)
-crys_log("This is a debug message")
+    import inspect
+    func = inspect.currentframe().f_back.f_code
+    if DEBUG_MODE:
+        print("[%s] [%s:%s]: %s" % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), func.co_name, func.co_firstlineno, message))
 
 class RedisConfig():
     def __init__(self, host, port, db, password=None):

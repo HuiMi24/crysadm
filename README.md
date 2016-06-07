@@ -1,6 +1,5 @@
-大部分代码都是从别人那里merge过来的，我只是加了一些自己想要的功能。
-现在打算重构部分代码，如果大家发现bug或者想要什么功能欢迎留言，更欢迎直接提交代码
-
+#声明
+云监工的原作者是powergx，有很多功能也是从别人那里merge过来的。我只是加了一些自己想要的功能。
 
 # 云监工配置Nginx、uWSGI
 
@@ -78,7 +77,7 @@ sudo chown -R pi:pi /var/log/uwsgi
 ```
 ##克隆云监工代码
 ```bash
-cd /var/www/crysadm
+cd /var/www/
 git clone https://github.com/HuiMi24/crysadm.git
 ```
 首先将云监工后台运行起来

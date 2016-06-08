@@ -24,6 +24,8 @@ sudo chown -R pi:pi /var/www/crysadm
 ```bash
 sudo rm /etc/nginx/sites-enabled/default
 ```
+配置文件已上传，不感兴趣的可以直接跳到最后一步
+
 创建云监工使用的配置文件/var/www/crysadm/crysadm_nginx.conf
 ```shell
 server {

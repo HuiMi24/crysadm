@@ -196,7 +196,7 @@ def save_history(username):
 # 获取保存的历史数据
 def save_income_history(username, pdc_detail):
 
-    config.crys_log( username.encode('utf-8'), 'save_income_history')
+    config.crys_log( username.encode('utf-8'))
     now = datetime.now()
     key = 'user_data:%s:%s' % (username, 'income.history')
     b_income_history = r_session.get(key)
@@ -219,7 +219,7 @@ def save_income_history(username, pdc_detail):
 # 重新登录
 def __relogin(username, password, account_info, account_key):
 
-    config.crys_log( username.encode('utf-8'), 'relogin')
+    config.crys_log( username.encode('utf-8'))
 
     login_result = login(username, password, conf.ENCRYPT_PWD_URL)
 

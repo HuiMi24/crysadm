@@ -80,13 +80,15 @@ sudo chown -R pi:pi /var/log/uwsgi
 cd /var/www/
 git clone https://github.com/HuiMi24/crysadm.git
 ```
-首先将云监工后台运行起来
+如果你是第一次部署，首先要启动redis-server
 ```bash
-python3.4 /var/www/crysadm/crysadm_helper.py >> /var/log/uwsgi/crysadm_uwsgi.log 2>&1 &
+sudo /etc/init.d/redis-server start
 ```
-执行uWSGI
+运行云监工
 ```bash
-uwsgi --ini /var/www/crysadm/crysadm_uwsgi.ini &
+sudo /var/www/crysadm/run.sh
 ```
+
 可以通过浏览器访问云监工了，默认的使用的端口是4000
+
 127.0.0.1:4000

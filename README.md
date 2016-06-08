@@ -82,7 +82,7 @@ git clone https://github.com/HuiMi24/crysadm.git
 ```
 首先将云监工后台运行起来
 ```bash
-python3.4 /var/www/crysadm/crysadm_helper.py >> /var/log/uwsgi/crysadm_uwsgi.log &
+python3.4 /var/www/crysadm/crysadm_helper.py >> /var/log/uwsgi/crysadm_uwsgi.log 2>&1 &
 ```
 执行uWSGI
 ```bash

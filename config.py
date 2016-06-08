@@ -3,7 +3,7 @@
 # config.py - configuration for crysadm web and redis server
 __author__ = 'powergx'
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 def crys_log(message):
     """Automatically log the current function details."""
     import inspect

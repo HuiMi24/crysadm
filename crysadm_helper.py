@@ -804,7 +804,6 @@ if __name__ == '__main__':
         if k.endswith('_interval') and config_info[k]<15:
             config_info[k]=15
          
-    # 如有任何疑问及Bug欢迎加入L.k群讨论
     # 执行收取水晶时间，单位为秒，默认为30秒。
     # 每30分钟检测一次收取水晶
     threading.Thread(target=timer, args=(collect_crystal, config_info['collect_crystal_interval'])).start()

@@ -356,11 +356,17 @@ def DoD_income_xunlei():
             # 产量柱子结束
                 yesterday_speed_data = yesterday_data.get('speed_stat')
             # 速度曲线开始
-            for i in range(0, 24):
+            for i in range(1, 24):
                 if yesterday_speed_data is not None:
                     yesterday_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
                 else:
                     yesterday_speed_series['data'] = []
+            else:
+                if yesterday_speed_data is not None:
+                    if 'today_last_speed' in yesterday_data:
+                        yesterday_speed_series['data'].append(yesterday_data.get('today_last_speed').get('speed_sum')*8/\
+                            yesterday_data.get('today_last_speed').get('cnt'))
+
             # 速度曲线结束
 
     now_income_value = sum(today_series['data'][0:now.hour])

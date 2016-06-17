@@ -157,6 +157,12 @@ def save_history(username):
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
+        #statistics 23-24 average speed
+        if datetime.now().hour == 23:
+            if today_data.get('today_last_speed') is None:
+                today_data['today_last_speed'] = dict(speed_sum=0, cnt = 0)
+            today_data['today_last_speed']['speed_sum'] += today_data['last_speed']
+            today_data['today_last_speed']['cnt'] += 1
     today_data['pdc'] += today_data['award_income'] 
     r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
 

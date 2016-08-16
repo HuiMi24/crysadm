@@ -1,6 +1,8 @@
 #声明
 云监工的原作者是powergx，有很多功能也是从别人那里merge过来的。我只是加了一些自己想要的功能。
 
+如果没有重大bug，此版本将不再更新。如果你发现bug，或者有新的功能，可以提交pull request。
+
 # 云监工配置Nginx、uWSGI
 
 ## 安装Nginx和uWSGI

@@ -15,6 +15,22 @@
                     <div class="tab-content">
                         <div class="tab-pane fade{% if action is none or action == 'info' %} active in{% endif %}" id="info">
                             <br />
+                            {% if (action is none or action == 'info') and err_msg %}
+                                <div class="col-lg-12">
+                                    <div class="alert alert-danger alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                        {{ err_msg|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if info_msg %}
+                                <div class="col-lg-12">
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                        {{ info_msg|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
                             <div class="form-group input-group ">
                                 <span class="input-group-addon"><span style="width: 73px; display: inline-block;">名称</span></span>
                                 <input type="text" class="form-control" placeholder="" value="{{ dev.result[1].device_name }}" disabled>
@@ -95,22 +111,60 @@
                         </div>
                         <div class="tab-pane fade{% if action == 'pattern' %} active in{% endif %}" id="pattern">
                             <br />
-                            <form role="form" action="/" method="post">
+                            {% if action == 'pattern' and err_msg %}
+                                <div class="col-lg-12">
+                                    <div class="alert alert-danger alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                        {{ err_msg|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if info_msg %}
+                                <div class="col-lg-12">
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                        {{ info_msg|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <p>
+                                日程的输入格式为：
+                            </p>
+                            <p>
+                                [开始时间]-[结束时间],[模式],[下行速度]-[上行速度]
+                            </p>
+                            <p>
+                                时间单位为小时，模式有:全速、智能、限速，速度单位为KB/s。多个日程换行分隔
+                            </p>
+                            <form role="form" action="/{% if dev.result[1].dcdn_upnp_message != '已禁用' %}disable_upnp{% else %}enable_upnp{% endif %}" method="post">
+                                <div class="form-group input-group">
+                                    <span class="input-group-addon"><span style="width: 73px; display: inline-block;">UPNP</span></span>
+                                    <input type="text" class="form-control" value="{{ dev.result[1].dcdn_upnp_message }}" disabled>
+                                    <span class="input-group-btn" style="padding-top: 0px;padding-bottom: 0px;">
+                                        <input type="hidden" name="device_id" value="{{ device_id }}">
+                                        <input type="hidden" name="account_id" value="{{ account_id }}">
+                                        <input type="hidden" name="session_id" value="{{ session_id }}">
+                                        {% if dev.result[1].dcdn_upnp_message != '已禁用' %}
+                                            <button type="submit" class="btn btn-danger">关闭UPNP</button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-success">开启UPNP</button>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </form>
+                            <form role="form" action="/set_device_schedule" method="post">
                                 <div class="form-group input-group">
                                     <span class="input-group-addon"><span style="width: 73px; display: inline-block;">名称</span></span>
                                     <input type="text" class="form-control" placeholder="" value="{{ dev.result[1].device_name }}" disabled>
                                 </div>
                                 <div class="form-group input-group">
                                     <span class="input-group-addon"><span style="width: 73px; display: inline-block;">时间</span></span>
-                                    <input type="text" class="form-control" value="{{ dev.result[1].schedule_hours[0].from }}点至{{ dev.result[1].schedule_hours[0].to }}点" disabled>
-                                    <span class="input-group-btn" style="padding-top: 0px;padding-bottom: 0px;">
-                                        {% if dev.result[1].schedule_hours[0].type == 'unlimit' %}
-                                            <button type="submit" class="btn btn-success">全速模式</button>
-                                        {% else %}
-                                            <button type="submit" class="btn btn-success">智能模式</button>
-                                        {% endif %}
-                                    </span>
+                                    <input type="hidden" name="device_id" value="{{ device_id }}">
+                                    <input type="hidden" name="account_id" value="{{ account_id }}">
+                                    <input type="hidden" name="session_id" value="{{ session_id }}">
+                                    <textarea type="text" name="schedule_text" class="form-control" style="min-height: 100px;width: 100%">{{schedule_text}}</textarea>
                                 </div>
+                                <button type="button" class="btn btn-success" style="margin: 0px;float: right">建设中</button>
                             </form>
                         </div>
                     </div>

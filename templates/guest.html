@@ -19,7 +19,6 @@
                             <tr>
                                 <th class="col-md-1">时间</th>
                                 <th class="col-md-1">用户名</th>
-                                <th class="col-md-1">访问IP</th>
                                 <th class="col-md-1">端口</th>
                                 <th class="col-md-1 hidden-xs">详细信息</th>
                             </tr>
@@ -30,7 +29,6 @@
                                     <td class="hidden-xs">{{ row.time|e }}</td>
                                     <td class="visible-xs">{{ row.time.split(' ')[1] }}</td>
                                     <td>{{ row.username|e }}</td>
-                                    <td>{{ row.ip|e }}</td>
                                     <td>{{ row.port|e }}</td>
                                     <td class="hidden-xs">{{ row.http|e }}</td>
                                 </tr>

@@ -5,7 +5,6 @@ from crysadm_helper import r_session
 from requests.adapters import HTTPAdapter
 import time
 from urllib.parse import urlparse, parse_qs
-import re, sys
 
 requests.packages.urllib3.disable_warnings()
 
@@ -27,11 +26,10 @@ def api_post(cookies, url, data, verify=False, headers=agent_header, timeout=60)
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
 
-    if r.status_code != 200:
+    if r.status_code != 200: 
         return __handle_exception(rd=r.reason)
 
     return json.loads(r.text)
-
 
 # 申请提现请求
 def exec_draw_cash(cookies, limits=None):
@@ -60,13 +58,11 @@ def exec_draw_cash(cookies, limits=None):
 
     return r
 
-
 # 获取提现信息
 def get_can_drawcash(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='1', appversion=appversion)
     return api_post(url='/?r=usr/drawcashInfo', data=body, cookies=cookies)
-
 
 # 检测提现余额
 def get_balance_info(cookies):
@@ -114,13 +110,11 @@ def get_speed_stat(cookies):
 
     return json.loads(r.text).get('sds')
 
-
 # 获取个人信息
 def get_privilege(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='1', appversion=appversion, ver=appversion)
     return api_post(url='/?r=usr/privilege', data=body, cookies=cookies)
-
 
 # 获取设备状态
 def get_device_stat(s_type, cookies):
@@ -133,13 +127,11 @@ def collect(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     return api_post(url='/index.php?r=mine/collect', data=None, cookies=cookies)
 
-
 # 获取宝箱信息
 def api_giftbox(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(tp='0', p='0', ps='60', t='', v='2', cmid='-1')
     return api_post(url='/?r=usr/giftbox', data=body, cookies=cookies)
-
 
 # 提交打开宝箱请求
 def api_openStone(cookies, giftbox_id, direction):
@@ -147,25 +139,21 @@ def api_openStone(cookies, giftbox_id, direction):
     body = dict(v='1', id=str(giftbox_id), side=direction)
     return api_post(url='/?r=usr/openStone', data=body, cookies=cookies)
 
-
 # 提交放弃宝箱请求
 def api_giveUpGift(cookies, giftbox_id):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='2', id=str(giftbox_id), tag='0')
     return api_post(url='/?r=usr/giveUpGift', data=body, cookies=cookies)
 
-
 # 获取幸运转盘信息
 def api_getconfig(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     return api_post(url='/?r=turntable/getconfig', data=None, cookies=cookies)
 
-
 # 提交幸运转盘请求
 def api_getaward(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     return api_post(url='/?r=turntable/getaward', data=None, cookies=cookies)
-
 
 # 获取秘银进攻信息
 def api_sys_getEntry(cookies):
@@ -173,13 +161,11 @@ def api_sys_getEntry(cookies):
     body = dict(v='6')
     return api_post(url='/?r=sys/getEntry', data=body, cookies=cookies)
 
-
 # 获取秘银复仇信息
 def api_steal_stolenSilverHistory(cookies):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(v='2', p='0', ps='20')
     return api_post(url='/?r=steal/stolenSilverHistory', data=body, cookies=cookies)
-
 
 # 提交秘银进攻请求
 def api_steal_search(cookies, searcht_id=0):
@@ -187,20 +173,17 @@ def api_steal_search(cookies, searcht_id=0):
     body = dict(v='2', sid=str(searcht_id))
     return api_post(url='/?r=steal/search', data=body, cookies=cookies)
 
-
 # 提交收集秘银请求
 def api_steal_collect(cookies, searcht_id):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(sid=str(searcht_id), cmid='-2', v='2')
     return api_post(url='/?r=steal/collect', data=body, cookies=cookies)
 
-
 # 提交进攻结果请求
 def api_steal_summary(cookies, searcht_id):
     cookies['origin'] = '4' if len(cookies.get('sessionid')) == 128 else '1'
     body = dict(sid=str(searcht_id), v='2')
     return api_post(url='/?r=steal/summary', data=body, cookies=cookies)
-
 
 # 获取星域存储相关信息
 def ubus_cd(session_id, account_id, action, out_params, url_param=None):
@@ -223,15 +206,6 @@ def ubus_cd(session_id, account_id, action, out_params, url_param=None):
     except requests.exceptions.RequestException as e:
         return __handle_exception(e=e)
 
-
-def check_award_income(r):
-    crystal_pattern = re.compile('.*抽中([0-9]+).*水晶.*')
-    crystal_match = crystal_pattern.match(r)
-    if crystal_match:
-        return int(crystal_match.group(1))
-    return 0
-
-
 # 发送设置链接
 def parse_setting_url(url):
     query_s = parse_qs(urlparse(url).query, keep_blank_values=True)
@@ -241,14 +215,12 @@ def parse_setting_url(url):
     account_id = query_s['user_id'][0]
     return device_id, session_id, account_id
 
-
 # 检测是否API错误
 def is_api_error(r):
     if r.get('r') == -12345:
         return True
 
     return False
-
 
 # 接口故障
 def __handle_exception(e=None, rd='接口故障', r=-12345):

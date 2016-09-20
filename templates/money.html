@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-lg-4 .col-md-4">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    支出统计
+                </div>
+                <div class="ibox-content" id="outcome">
+                    <div class="row">
+                        {% if err_msg %}
+                            <div class="col-lg-12">
+                                <div class="alert alert-danger alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    {{ err_msg }}
+                                </div>
+                            </div>
+                        {% endif %}
+						<form role="form" action="/user/change_money/hardware_outcome" method="post">
+							<div class="form-group input-group ">
+								<span class="input-group-addon"><span style="width: 120px; display: inline-block;">硬件支出</span></span>
+								<input type="text" class="form-control" name="hardware_outcome" placeholder="输入硬件支出" value="{{user_info.hardware_outcome|safe}}">
+								<span class="input-group-btn">
+										<button type="submit" class="btn btn-success" style="text-align:middle; width: 60px;padding-top: 0px;padding-bottom: 0px;">设置</button>
+								</span>					
+							</div>	
+						</form>
+						<form role="form" action="/user/change_money/other_outcome" method="post">						
+							<div class="form-group input-group ">
+								<span class="input-group-addon"><span style="width: 120px; display: inline-block;">其他前期支出</span></span>
+								<input type="text" class="form-control" name="other_outcome" placeholder="输入其他支出" value="{{user_info.other_outcome|safe}}" >
+								<span class="input-group-btn">
+										<button type="submit" class="btn btn-success" style="text-align:middle; width: 60px;padding-top: 0px;padding-bottom: 0px;">设置</button>
+								</span>					
+							</div>		
+						</form>
+						<form role="form" action="/user/change_money/daily_outcome" method="post">				
+							<div class="form-group input-group ">
+								<span class="input-group-addon"><span style="width: 120px; display: inline-block;">每日维护支出</span></span>
+								<input type="text" class="form-control" name="daily_outcome" placeholder="输入每日支出" value="{{user_info.daily_outcome|safe}}" >
+								<span class="input-group-btn">
+										<button type="submit" class="btn btn-success" style="text-align:middle; width: 60px;padding-top: 0px;padding-bottom: 0px;">设置</button>
+								</span>					
+							</div>			
+						</form>
+						<form role="form" action="/user/change_money/daily_outcome_start_date" method="post">						
+							<div class="form-group input-group ">
+								<span class="input-group-addon"><span style="width: 120px; display: inline-block;">维护支出起计日期</span></span>
+								<input type="text" class="form-control" name="daily_outcome_start_date" placeholder="输入每日支出起始日期" value="{{user_info.daily_outcome_start_date|safe}}" >
+								<span class="input-group-btn">
+										<button type="submit" class="btn btn-success" style="text-align:middle; width: 60px;padding-top: 0px;padding-bottom: 0px;">设置</button>
+								</span>					
+							</div>
+						</form>
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">累计维护支出</span></span>
+							<input type="text" class="form-control" name="daily_outcome_total" placeholder="累计每日支出" value="{{convert_to_yuanjiaofen(data_money.daily_outcome_total)|safe}}" disabled>
+						</div>							
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">总支出金额</span></span>
+							<input type="text" class="form-control" name="outcome_total" placeholder="总支出金额" value="{{convert_to_yuanjiaofen(data_money.outcome_total)|safe}}" disabled>
+						</div>												
+                    </div>
+                    <!-- /.row (nested) -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+        <div class="col-lg-4 .col-md-4">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    收入统计
+                </div>
+                <div class="ibox-content" id="income">
+                    <div class="row">
+                        {% if err_msg %}
+                            <div class="col-lg-12">
+                                <div class="alert alert-danger alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    {{ err_msg }}
+                                </div>
+                            </div>
+                        {% endif %}
+						<form role="form" action="/user/change_money/withdrawn_money_modify" method="post">
+							<div class="form-group input-group ">
+								<span class="input-group-addon"><span style="width: 120px; display: inline-block;">已提现金额</span></span>
+								<input type="text" class="form-control" name="withdrawn_money_modify" placeholder="输入已提现金额" value="{{user_info.withdrawn_money_modify|safe}}" >
+								<span class="input-group-btn">
+										<button type="submit" class="btn btn-success" style="text-align:middle; width: 60px;padding-top: 0px;padding-bottom: 0px;">设置</button>
+								</span>					
+							</div>		
+						</form>
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">账户余额</span></span>
+							<input type="text" class="form-control" placeholder="读取账户余额" id="money_balance" value="{{convert_to_yuanjiaofen(data_money.balance)}}" disabled>
+						</div>	
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">总收入金额</span></span>
+							<input type="text" class="form-control" placeholder="计算总收入金额" value="{{convert_to_yuanjiaofen(data_money.total_income_money)|safe}}" disabled>
+						</div>													
+                    </div>
+                    <!-- /.row (nested) -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+        <div class="col-lg-4 .col-md-4">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    收支情况
+                </div>
+                <div class="ibox-content" id="profic">
+                    <div class="row">
+                        {% if err_msg %}
+                            <div class="col-lg-12">
+                                <div class="alert alert-danger alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    {{ err_msg }}
+                                </div>
+                            </div>
+                        {% endif %}
+
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">最近7日均收入</span></span>
+							<input type="text" class="form-control" placeholder="读取最近7日均收入" id="money_sevenDaysAverage" value="{{convert_to_yuanjiaofen(data_money.sevenDaysAverage)|safe}}" disabled>
+						</div>	
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">每日支出</span></span>
+							<input type="text" class="form-control" placeholder="读取每日支出" value="{{user_info.daily_outcome|safe}}" disabled>
+						</div>	
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">日均利润</span></span>
+							<input type="text" class="form-control" placeholder="计算日均利润" value="{{convert_to_yuanjiaofen(data_money.daily_profit)|safe}}" disabled>
+						</div>	
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">总盈亏金额</span></span>
+							<input type="text" class="form-control" placeholder="计算总盈亏金额" value="{{convert_to_yuanjiaofen(data_money.total_profit)|safe}}" disabled>
+						</div>	
+						<div class="form-group input-group ">
+							<span class="input-group-addon"><span style="width: 120px; display: inline-block;">预计回本天数</span></span>
+							<input type="text" class="form-control" placeholder="计算预计回本天数" value="{{(data_money.estimated_recover_days)|safe}}" disabled>
+						</div>							
+                    </div>
+                    <!-- /.row (nested) -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>  	
+		<!-- /.col-lg-12 -->
+
+    <div class="row">
+		<div class="col-lg-12">
+			<div class="ibox float-e-margins">
+				<div class="ibox-title">
+					说明
+				</div>
+				<div class="ibox-content" id="Manual">
+				总支出金额=硬件支出+其他前期支出+累计维护支出<br>
+				总收入金额=已提现金额+账户余额<br>
+				“维护支出起计日期”的格式：YYYY-MM-DD。（输入格式错误时将不会保存）
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block js_logic %}
+    <script>
+        function convert_to_yuan_new(crystal_values) {
+            return parseInt(crystal_values / 100) / 100;
+        }
+        $.getJSON('/money/calculate?random='+Math.random(), function (data) {
+			$('#money_sevenDaysAverage').html(100);
+        });
+    </script>
+{% endblock %}
+
+{% block navibar %}
+    <div class="col-lg-10">
+        <h2>收支分析</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/">Home</a>
+            </li>
+            <li class="active">
+                <strong>Money</strong>
+            </li>
+        </ol>
+    </div>
+{% endblock %}
+{% set active_page = "money" %}

@@ -7,9 +7,6 @@ import json
 import socket
 import struct
 
-import sys
-
-
 # 获取前一日收益
 def __get_yesterday_pdc(username):
     today = datetime.now()
@@ -56,7 +53,6 @@ def dashboard():
 
     return render_template('dashboard.html', user_info=user_info)
 
-
 # 刷新控制面板数据
 @app.route('/dashboard_data')
 @requires_auth
@@ -65,7 +61,6 @@ def dashboard_data():
     username = user.get('username')
     str_today = datetime.now().strftime('%Y-%m-%d')
     key = 'user_data:%s:%s' % (username, str_today)
-
     b_data = r_session.get(key)
 
     user_key = '%s:%s' % ('user', user.get('username'))
@@ -76,7 +71,7 @@ def dashboard_data():
             'updated_time': '2015-01-01 00:00:00',
             'm_pdc': 0,
             'last_speed': 0,
-            'deploy_speed': 0,
+            'deploy_speed' : 0,
             'w_pdc': 0,
             'yesterday_m_pdc': 0,
             'speed_stat': [],
@@ -86,7 +81,6 @@ def dashboard_data():
             'w_award_income': 0
         }
         return Response(json.dumps(dict(today_data=empty_data)), mimetype='application/json')
-
     today_data = json.loads(b_data.decode('utf-8'))
     need_save = False
     if today_data.get('yesterday_m_pdc') is None or today_data.get('yesterday_w_pdc') is None or today_data.get('yesterday_w_award_income') is None or today_data.get('yesterday_m_award_income') is None:
@@ -110,7 +104,6 @@ def dashboard_data():
     elif user_info.get('is_show_wpdc') == 2:
         today_data['w_award_income'] = today_data.get('m_award_income')
     return Response(json.dumps(dict(today_data=today_data)), mimetype='application/json')
-
 
 # 刷新控制面板图表速度数据
 @app.route('/dashboard/speed_share')
@@ -137,16 +130,18 @@ def dashboard_speed_share():
         for device_info in account_info.get('device_info'):
             if device_info.get('status') != 'online':
                 continue
-            uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)
-            total_speed += uploadspeed
-            device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))
+            uploadspeed = int(int(device_info.get('dcdn_upload_speed')) / 1024)            
+            #downloadspeed = int(int(device_info.get('dcdn_deploy_speed')) / 1024)
+            # total_speed += downloadspeed
+            total_speed += uploadspeed            
+            device_speed.append(dict(name=device_info.get('device_name'), value=uploadspeed))            
             # device_speed.append(dict(name=device_info.get('device_name'), value=total_speed))
 
         # 显示在速度分析器圆形图表上的设备ID
         drilldown_data.append(dict(name='矿主ID:' + mid, value=total_speed, drilldown_data=device_speed))
+        #drilldown_data.append(dict(name='设备名:' + device_info.get('device_name'), value=total_speed, drilldown_data=device_speed))
 
     return Response(json.dumps(dict(data=drilldown_data)), mimetype='application/json')
-
 
 # 显示控制面板速度详情
 @app.route('/dashboard/speed_detail')
@@ -210,7 +205,7 @@ def dashboard_today_income_share():
 
     return Response(json.dumps(dict(data=pie_data)), mimetype='application/json')
 
-
+# 同比产量
 @app.route('/dashboard/DoD_income')
 @requires_auth
 def dashboard_DoD_income():
@@ -225,8 +220,6 @@ def dashboard_DoD_income():
         dod_income = DoD_income_xunlei()
 
     return dod_income
-
-
 # 默认统计
 def DoD_income_yuanjiangong():
     user = session.get('user_info')
@@ -356,17 +349,11 @@ def DoD_income_xunlei():
             # 产量柱子结束
                 yesterday_speed_data = yesterday_data.get('speed_stat')
             # 速度曲线开始
-            for i in range(1, 24):
+            for i in range(0, 24):
                 if yesterday_speed_data is not None:
                     yesterday_speed_series['data'].append(sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
                 else:
                     yesterday_speed_series['data'] = []
-            else:
-                if yesterday_speed_data is not None:
-                    if 'today_last_speed' in yesterday_data:
-                        yesterday_speed_series['data'].append(yesterday_data.get('today_last_speed').get('speed_sum')*8/\
-                            yesterday_data.get('today_last_speed').get('cnt'))
-
             # 速度曲线结束
 
     now_income_value = sum(today_series['data'][0:now.hour])
@@ -392,7 +379,6 @@ def DoD_income_xunlei():
 def index():
     return redirect(url_for('login'))
 
-
 # 显示crysadm管理员界面（初次登录）
 @app.route('/install')
 def install():
@@ -414,7 +400,6 @@ def install():
 
     return redirect(url_for('login'))
 
-
 # 添加用户
 @app.context_processor
 def add_function():
@@ -433,9 +418,11 @@ def add_function():
 
     def int2ip(int_ip):
         return socket.inet_ntoa(struct.pack("I", int_ip))
+    
+    def convert_to_yuanjiaofen(crystal_values):
+        return int(crystal_values / 100) / 100
 
-    return dict(convert_to_yuan=convert_to_yuan, get_device_type=get_device_type, int2ip=int2ip)
-
+    return dict(convert_to_yuan=convert_to_yuan, get_device_type=get_device_type, int2ip=int2ip,convert_to_yuanjiaofen=convert_to_yuanjiaofen)
 
 # 显示消息框
 @app.context_processor
@@ -515,3 +502,61 @@ def accounts_count():
     accounts_count = dict(users=users, accounts=accounts, accountsk=accountsk)
     r_session.setex(count_key, json.dumps(accounts_count), 120)
     return dict(accounts_count=accounts_count)
+
+@app.route('/money')
+@requires_auth
+def moneyAnalyzer():
+    user = session.get('user_info')
+    username = user.get('username')
+
+    user_key = '%s:%s' % ('user', username)
+    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
+
+    data_money = dict(balance=0,sevenDaysAverage=0,total_income_money=0,daily_profit=0,daily_outcome_total=0,outcome_total=0,estimated_recover_days=0)
+    value = 0
+    counter=0
+    today = datetime.today()
+    for b_data in r_session.mget(
+            *['user_data:%s:%s' % (username, (today + timedelta(days=i)).strftime('%Y-%m-%d')) for i in range(-7, 0)]):
+        if b_data is None:
+            continue
+        counter+=1
+        data_money = json.loads(b_data.decode('utf-8'))
+        value+=data_money.get('pdc')
+    if counter!=0:
+        data_money['sevenDaysAverage']=value/counter
+
+    str_today = datetime.now().strftime('%Y-%m-%d')
+    key = 'user_data:%s:%s' % (username, str_today)
+    b_data = r_session.get(key)
+    if b_data is not None:
+        data_money['balance'] = json.loads(b_data.decode('utf-8')).get('balance')
+
+    try:
+        data_money['total_income_money'] = user_info['withdrawn_money_modify']*10000+data_money['balance']
+    except KeyError:
+        data_money['total_income_money'] = 0
+    try:
+        data_money['daily_profit'] = data_money['sevenDaysAverage']-user_info['daily_outcome']*10000
+    except KeyError:
+        data_money['daily_profit'] = 0
+    try:
+        startDay=datetime.strptime(user_info['daily_outcome_start_date'],'%Y-%m-%d')
+        days_delta = (datetime.now()-startDay).days
+    except KeyError:
+        days_delta=0
+    try:
+        data_money['daily_outcome_total'] = user_info['daily_outcome']*days_delta*10000
+    except KeyError:
+        data_money['daily_outcome_total'] = 0
+    try:
+        data_money['outcome_total'] = data_money['daily_outcome_total'] + (user_info['hardware_outcome'] + user_info['other_outcome'])*10000
+    except KeyError:
+        data_money['outcome_total'] = 0
+    data_money['total_profit'] = (data_money['total_income_money'] - data_money['outcome_total'])
+    if data_money['daily_profit']!=0:
+        data_money['estimated_recover_days'] = int(data_money['total_profit']/data_money['daily_profit'])*(-1)
+
+    return render_template('money.html', data_money=data_money,user_info=user_info)
+
+

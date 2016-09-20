@@ -1,22 +1,32 @@
-__author__ = 'powergx'
+_author__ = 'powergx'
+from flask import Flask,render_template
 import config, socket, redis
+import time
 from login import login
 from datetime import datetime, timedelta
 from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
-from api import *
 
-conf = config.TestingConfig
+
+conf = None
+if socket.gethostname() == 'GXMBP.local':
+    conf = config.DevelopmentConfig
+elif socket.gethostname() == 'iZ23bo17lpkZ':
+    conf = config.ProductionConfig
+else:
+    conf = config.TestingConfig
 
 redis_conf = conf.REDIS_CONF
 pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)
 
 
+from api import *
+
 # 获取用户数据
 def get_data(username):
-    config.crys_log('get %s data' % username)
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_data')
 
     start_time = datetime.now()
     try:
@@ -25,10 +35,9 @@ def get_data(username):
             account_key = 'account:%s:%s' % (username, user_id.decode('utf-8'))
             account_info = json.loads(r_session.get(account_key).decode('utf-8'))
 
-            if not account_info.get('active'):
-                continue
+            if not account_info.get('active'): continue
 
-            config.crys_log('start get data with user id %s ' % user_id)
+            print("start get_data with userID:", user_id)
 
             session_id = account_info.get('session_id')
             user_id = account_info.get('user_id')
@@ -36,15 +45,13 @@ def get_data(username):
 
             mine_info = get_mine_info(cookies)
             if is_api_error(mine_info):
-                config.crys_log('get data %s error#' % user_id)
+                print('get_data:', user_id, mine_info, 'error')
                 return
 
             if mine_info.get('r') != 0:
 
-                success, account_info = __relogin(account_info.get('account_name'), account_info.get('password'),
-                                                  account_info, account_key)
+                success, account_info = __relogin(account_info.get('account_name'), account_info.get('password'), account_info, account_key)
                 if not success:
-                    config.crys_log('%s re-login failed' % user_id)
                     print('get_data:', user_id, 'relogin failed')
                     continue
                 session_id = account_info.get('session_id')
@@ -53,7 +60,7 @@ def get_data(username):
                 mine_info = get_mine_info(cookies)
 
             if mine_info.get('r') != 0:
-                config.crys_log('get mime info %s error#' % user_id)
+                print('get_data:', user_id, mine_info, 'error')
                 continue
 
             device_info = ubus_cd(session_id, user_id, 'get_devices', ["server", "get_devices", {}])
@@ -86,7 +93,7 @@ def get_data(username):
             account_data['produce_info'] = get_produce_stat(cookies)
 
             if is_api_error(account_data.get('income')):
-                config.crys_log('get income %s error#' % user_id)
+                print('get_data:', user_id, 'income', 'error')
                 return
 
             r_session.set(account_data_key, json.dumps(account_data))
@@ -99,16 +106,15 @@ def get_data(username):
             save_history(username)
 
         r_session.setex('user:%s:cron_queued' % username, '1', 60)
-        config.crys_log('get data user %s successed#' % username)
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'successed')
+
     except Exception as ex:
-        config.crys_log('get data user %s failed##' % username)
         print(username.encode('utf-8'), 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), ex)
 
 
 # 保存历史数据
 def save_history(username):
-
-    config.crys_log( 'save_history')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'save_history')
     str_today = datetime.now().strftime('%Y-%m-%d')
     key = 'user_data:%s:%s' % (username, str_today)
     b_today_data = r_session.get(key)
@@ -125,8 +131,7 @@ def save_history(username):
     today_data['income'] = 0
     today_data['speed_stat'] = list()
     today_data['pdc_detail'] = []
-    today_data['giftbox_pdc'] = 0
-    today_data['produce_stat'] = []
+    today_data['produce_stat'] = [] 
     today_data['award_income'] = 0
 
     for user_id in r_session.smembers('accounts:%s' % username):
@@ -157,12 +162,6 @@ def save_history(username):
         for device in data.get('device_info'):
             today_data['last_speed'] += int(int(device.get('dcdn_upload_speed')) / 1024)
             today_data['deploy_speed'] += int(device.get('dcdn_download_speed') / 1024)
-        #statistics 23-24 average speed
-        if datetime.now().hour == 23:
-            if today_data.get('today_last_speed') is None:
-                today_data['today_last_speed'] = dict(speed_sum=0, cnt = 0)
-            today_data['today_last_speed']['speed_sum'] += today_data['last_speed']
-            today_data['today_last_speed']['cnt'] += 1
     today_data['pdc'] += today_data['award_income'] 
     r_session.setex(key, json.dumps(today_data), 3600 * 24 * 35)
 
@@ -198,11 +197,9 @@ def save_history(username):
         r_session.set(extra_info_key,json.dumps(extra_info))
     save_income_history(username, today_data.get('pdc_detail'))
 
-
 # 获取保存的历史数据
 def save_income_history(username, pdc_detail):
-
-    config.crys_log( username.encode('utf-8'))
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'save_income_history')
     now = datetime.now()
     key = 'user_data:%s:%s' % (username, 'income.history')
     b_income_history = r_session.get(key)
@@ -221,12 +218,9 @@ def save_income_history(username, pdc_detail):
 
     r_session.setex(key, json.dumps(income_history), 3600 * 72)
 
-
 # 重新登录
 def __relogin(username, password, account_info, account_key):
-
-    config.crys_log( username.encode('utf-8'))
-
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), username.encode('utf-8'), 'relogin')
     login_result = login(username, password, conf.ENCRYPT_PWD_URL)
 
     if login_result.get('errorCode') != 0:
@@ -240,25 +234,22 @@ def __relogin(username, password, account_info, account_key):
     r_session.set(account_key, json.dumps(account_info))
     return True, account_info
 
-
 # 获取在线用户数据
 def get_online_user_data():
-
-    config.crys_log( 'get_online_user_data')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'): return
 
-    pool = ThreadPool(processes=1)
+    pool = ThreadPool(processes=5)
 
     pool.map(get_data, (u.decode('utf-8') for u in r_session.smembers('global:online.users')))
     pool.close()
     pool.join()
 
-
 # 获取离线用户数据
 def get_offline_user_data():
-    config.crys_log( 'get_offline_user_data')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'): return
-    if datetime.now().minute < 50: return
+#    if datetime.now().minute < 50: return
 
     offline_users = []
     for b_user in r_session.mget(*['user:%s' % name.decode('utf-8') for name in r_session.sdiff('users', *r_session.smembers('global:online.users'))]):
@@ -279,19 +270,17 @@ def get_offline_user_data():
     pool.close()
     pool.join()
 
-
 # 从在线用户列表中清除离线用户
 def clear_offline_user():
-    config.crys_log( 'clear_offline_user')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'clear_offline_user')
     for b_username in r_session.smembers('global:online.users'):
         username = b_username.decode('utf-8')
         if not r_session.exists('user:%s:is_online' % username):
             r_session.srem('global:online.users', username)
 
-
 # 刷新选择自动任务的用户
 def select_auto_task_user():
-    config.crys_log( 'select_auto_task_user')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'select_auto_task_user')
     auto_collect_accounts = []
     auto_drawcash_accounts = []
     auto_giftbox_accounts = []
@@ -349,7 +338,7 @@ def select_auto_task_user():
 def check_report(user, cookies, user_info):
     from mailsand import send_email
     from mailsand import validateEmail
-    config.crys_log( 'check_report')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_report')
     extra_info_key='extra_info:%s' % (user_info.get('username'))
     b_extra_info=r_session.get(extra_info_key)
     if b_extra_info is None:
@@ -361,7 +350,7 @@ def check_report(user, cookies, user_info):
     if 'last_report_date' not in extra_info.keys():
         extra_info['last_report_date'] = '1997-1-1 1:1:1'
     if datetime.strptime(extra_info['last_report_date'],'%Y-%m-%d %H:%M:%S').day == datetime.now().day: return
-    config.crys_log( 'check_report')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_report')
     str_yesterday = (datetime.now() + timedelta(days=-1)).strftime('%Y-%m-%d')
     yesterday_key = 'user_data:%s:%s' % (user_info.get('username'), str_yesterday)
     b_yesterday_data = r_session.get(yesterday_key)
@@ -385,6 +374,9 @@ def check_report(user, cookies, user_info):
                 </TH>
                 <TH style="BORDER-TOP: #c1dad7 1px solid; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #cae8ea; BORDER-BOTTOM: #c1dad7 1px solid; TEXT-TRANSFORM: uppercase; COLOR: #4f6b72; PADDING-BOTTOM: 6px; TEXT-ALIGN: left; PADDING-TOP: 6px; FONT: bold 11px 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif; PADDING-LEFT: 12px; LETTER-SPACING: 2px; PADDING-RIGHT: 6px" scope=col>
                     平均速度(KB/S)
+                </TH>
+                <TH style="BORDER-TOP: #c1dad7 1px solid; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #cae8ea; BORDER-BOTTOM: #c1dad7 1px solid; TEXT-TRANSFORM: uppercase; COLOR: #4f6b72; PADDING-BOTTOM: 6px; TEXT-ALIGN: left; PADDING-TOP: 6px; FONT: bold 11px 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif; PADDING-LEFT: 12px; LETTER-SPACING: 2px; PADDING-RIGHT: 6px" scope=col>
+                    上传估量(GB)
                 </TH>
                 <TH style="BORDER-TOP: #c1dad7 1px solid; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #cae8ea; BORDER-BOTTOM: #c1dad7 1px solid; TEXT-TRANSFORM: uppercase; COLOR: #4f6b72; PADDING-BOTTOM: 6px; TEXT-ALIGN: left; PADDING-TOP: 6px; FONT: bold 11px 'Trebuchet MS', Verdana, Arial, Helvetica, sans-serif; PADDING-LEFT: 12px; LETTER-SPACING: 2px; PADDING-RIGHT: 6px" scope=col>
                     今日收益(￥)
@@ -417,6 +409,9 @@ def check_report(user, cookies, user_info):
                     """ + ('%.1f' % (td_speed[stat['mid']])) + """
                 </TD>
                 <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #fff; BORDER-BOTTOM: #c1dad7 1px solid; COLOR: #4f6b72; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
+                    """ + ('%.1f' % (td_speed[stat['mid']]*86400/1024/1024)) + """
+                </TD>
+                <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #fff; BORDER-BOTTOM: #c1dad7 1px solid; COLOR: #4f6b72; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
                     """ + ('%.2f' % (td_produce[stat['mid']])) + """
                 </TD>
             </TR>
@@ -430,6 +425,9 @@ def check_report(user, cookies, user_info):
                     """ + ('%.1f' % (td_speed[stat['mid']])) + """
                 </TD>
                 <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #f5fafa; BORDER-BOTTOM: #c1dad7 1px solid; COLOR: #797268; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
+                    """ + ('%.1f' % (td_speed[stat['mid']]*86400/1024/1024)) + """
+                </TD>
+                <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: #f5fafa; BORDER-BOTTOM: #c1dad7 1px solid; COLOR: #797268; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
                     """ + ('%.2f' % (td_produce[stat['mid']])) + """
                 </TD>
             </TR>
@@ -441,6 +439,9 @@ def check_report(user, cookies, user_info):
                 </TH>
                 <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #4f6b72; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
                     """ + ('%.1f' % (s_sum)) + """
+                </TD>
+                <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #4f6b72; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
+                    """ + ('%.1f' % (s_sum*86400/1024/1024)) + """
                 </TD>
                 <TD style="FONT-SIZE: 11px; BORDER-RIGHT: #c1dad7 1px solid; BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #4f6b72; PADDING-BOTTOM: 6px; PADDING-TOP: 6px; PADDING-LEFT: 12px; PADDING-RIGHT: 6px">
                     """ + ('%.2f' % (p_sum)) + """
@@ -466,7 +467,7 @@ def check_report(user, cookies, user_info):
 def detect_exception(user, cookies, user_info):
     from mailsand import send_email
     from mailsand import validateEmail
-    config.crys_log( 'detect_exception')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'detect_exception')
     config_key = '%s:%s' % ('user', 'system')
     config_info = json.loads(r_session.get(config_key).decode('utf-8'))
     account_data_key = 'account:%s:%s:data' % (user_info.get('username'), user.get('userid'))        
@@ -535,14 +536,14 @@ def detect_exception(user, cookies, user_info):
 
 # 执行收取水晶函数
 def check_collect(user, cookies, user_info):
-    config.crys_log( 'check_collect')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_collect')
     mine_info = get_mine_info(cookies)
     time.sleep(2)
     if mine_info.get('r') != 0: return
     if 'collect_crystal_modify' in user_info.keys():
-        limit = user_info.get('collect_crystal_modify')
+        limit=user_info.get('collect_crystal_modify')
     else:
-        limit = 16000;
+        limit=16000;
 
     if mine_info.get('td_not_in_a') > limit:
         r = collect(cookies)
@@ -553,22 +554,20 @@ def check_collect(user, cookies, user_info):
         red_log(user, '自动执行', '收取', log)
     time.sleep(3)
 
-
 # 执行自动提现的函数
 def check_drawcash(user, cookies, user_info):
-    config.crys_log( 'check_drawcash')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_drawcash')
     if 'draw_money_modify' in user_info.keys():
-        limit = user_info.get('draw_money_modify')
+        limit=user_info.get('draw_money_modify')
     else:
-        limit = 10.0
+        limit=10.0
     r = exec_draw_cash(cookies=cookies, limits=limit)
     red_log(user, '自动执行', '提现', r.get('rd'))
     time.sleep(3)
 
-
 # 执行免费宝箱函数
 def check_giftbox(user, cookies, user_info):
-    config.crys_log( 'check_giftbox')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
     box_info = api_giftbox(cookies)
     time.sleep(2)
     if box_info.get('r') != 0: return
@@ -589,10 +588,9 @@ def check_giftbox(user, cookies, user_info):
         red_log(user, '自动执行', '宝箱', log)
     time.sleep(3)
 
-
 # 执行秘银进攻函数
 def check_searcht(user, cookies, user_info):
-    config.crys_log( 'check_searcht')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
     r = api_sys_getEntry(cookies)
     time.sleep(2)
     if r.get('r') != 0: return
@@ -612,10 +610,9 @@ def check_searcht(user, cookies, user_info):
         red_log(user, '自动执行', '进攻', log)
     time.sleep(3)
 
-
 # 执行秘银复仇函数
 def check_revenge(user, cookies, user_info):
-    config.crys_log( 'check_revenge')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_revenge')
     r = api_steal_stolenSilverHistory(cookies)
     time.sleep(2)
     if r.get('r') != 0: return
@@ -638,7 +635,7 @@ def check_revenge(user, cookies, user_info):
 
 # 执行幸运转盘函数
 def check_getaward(user, cookies, user_info):
-    config.crys_log( 'check_getaward')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
     r = api_getconfig(cookies)
     time.sleep(2)
     if r.get('rd') != 'ok': return
@@ -649,81 +646,69 @@ def check_getaward(user, cookies, user_info):
         else:
             log = '获得:%s' % regular_html(t.get('tip'))
         red_log(user, '自动执行', '转盘', log)
-
     time.sleep(3)
-    return r
-
 
 # 收取水晶
 def collect_crystal():
-    config.crys_log( 'collect_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'collect_crystal')
 
     cookies_auto(check_collect, 'global:auto.collect.cookies')
-
-
 #    for cookie in r_session.smembers('global:auto.collect.cookies'):
 #        check_collect(json.loads(cookie.decode('utf-8')))
 
 # 自动提现
 def drawcash_crystal():
-    config.crys_log( 'drawcash_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'drawcash_crystal')
     time_now = datetime.now()
     if int(time_now.isoweekday()) != 2: return
-    if int(time_now.hour) < 11 or int(time_now.hour) > 18: return
+    if int(time_now.hour) < 12 or int(time_now.hour) > 18: return
 
     cookies_auto(check_drawcash, 'global:auto.drawcash.cookies')
-
-
 #    for cookie in r_session.smembers('global:auto.drawcash.cookies'):
 #        check_drawcash(json.loads(cookie.decode('utf-8')))
 
 # 免费宝箱
 def giftbox_crystal():
-    config.crys_log( 'giftbox_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'giftbox_crystal')
 
     cookies_auto(check_giftbox, 'global:auto.giftbox.cookies')
-
-
 #    for cookie in r_session.smembers('global:auto.giftbox.cookies'):
 #        check_giftbox(json.loads(cookie.decode('utf-8')))
 
 # 秘银进攻
 def searcht_crystal():
-    config.crys_log( 'searcht_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'searcht_crystal')
+
     cookies_auto(check_searcht, 'global:auto.searcht.cookies')
-
-
 #    for cookie in r_session.smembers('global:auto.searcht.cookies'):
 #        check_searcht(json.loads(cookie.decode('utf-8')))
 
 # 秘银复仇
 def revenge_crystal():
-    config.crys_log( 'revenge_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'revenge_crystal')
 
     cookies_auto(check_revenge, 'global:auto.revenge.cookies')
-
+#    for cookie in r_session.smembers('global:auto.searcht.cookies'):
+#        check_searcht(json.loads(cookie.decode('utf-8')))
 
 # 幸运转盘
 def getaward_crystal():
-    config.crys_log( 'getaward_crystal')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
 
     cookies_auto(check_getaward, 'global:auto.getaward.cookies')
-
-
 #    for cookie in r_session.smembers('global:auto.getaward.cookies'):
 #        check_getaward(json.loads(cookie.decode('utf-8')))
 
 # 自动监测
 def auto_detect():
-    config.crys_log( 'auto_detect')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'auto_detect')
 
     cookies_auto(detect_exception, 'global:auto.detect.cookies')
 
 # 自动报告
 def auto_report():
-    config.crys_log( 'auto_report')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'auto_report')
     cookies_auto(check_report, 'global:auto.report.cookies')
-
 
 # 处理函数[重组]
 def cookies_auto(func, cookiename):
@@ -732,14 +717,13 @@ def cookies_auto(func, cookiename):
         for user in users:
             try:
                 cookies = json.loads(user.decode('utf-8'))
-                session_id = cookies.get('sessionid')
-                user_id = cookies.get('userid')
-                user_info = cookies.get('user_info')
+                session_id=cookies.get('sessionid')
+                user_id=cookies.get('userid')
+                user_info=cookies.get('user_info')
                 func(cookies, dict(sessionid=session_id, userid=user_id), user_info)
             except Exception as e:
                 print(e)
                 continue
-
 
 # 正则过滤+URL转码
 def regular_html(info):
@@ -775,13 +759,11 @@ def red_log(cook, clas, type, gets):
 
     r_session.set(record_key, json.dumps(record_info))
 
-
 # 计时器函数，定期执行某个线程，时间单位为秒
 def timer(func, seconds):
     while True:
         Process(target=func).start()
         time.sleep(seconds)
-
 
 if __name__ == '__main__':
     config_key = '%s:%s' % ('user', 'system')
@@ -810,6 +792,7 @@ if __name__ == '__main__':
         if k.endswith('_interval') and config_info[k]<15:
             config_info[k]=15
          
+    # 如有任何疑问及Bug欢迎加入L.k群讨论
     # 执行收取水晶时间，单位为秒，默认为30秒。
     # 每30分钟检测一次收取水晶
     threading.Thread(target=timer, args=(collect_crystal, config_info['collect_crystal_interval'])).start()
@@ -847,3 +830,4 @@ if __name__ == '__main__':
     threading.Thread(target=timer, args=(select_auto_task_user, config_info['select_auto_task_user_interval'])).start()
     while True:
         time.sleep(1)
+

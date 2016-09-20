@@ -66,59 +66,9 @@ def login():
 
 @app.route('/invitations')
 def public_invitation():
-    if session.get('user_info') is not None:
-        return redirect(url_for('dashboard'))
-
-    err_msg = None
-    if session.get('error_message') is not None:
-        err_msg = session.get('error_message')
-        session['error_message'] = None
-
-    inv_code = None
-    if session.get('invitation_code') is not None:
-        inv_code = session.get('invitation_code')
-        session['invitation_code'] = None
-
-    HTTP_X_REAL_IP = request.environ.get('HTTP_X_REAL_IP')
-
-    return render_template('public_invitation.html', err_msg=err_msg, inv_code=inv_code, ip=HTTP_X_REAL_IP)
-
-
-@app.route('/inv_codes', methods=['POST'])
-def public_inv_code():
-
-    public_key = 'invitation'
-    if r_session.get(public_key) is None:
-        r_session.set(public_key, json.dumps(dict(diary=[])))
-    public_info = json.loads(r_session.get(public_key).decode('utf-8'))
-
-    HTTP_X_REAL_IP = request.environ.get('HTTP_X_REAL_IP')
-    for public_code in public_info.get('diary'):
-        if HTTP_X_REAL_IP == public_code.get('ip'):
-            session['error_message'] = '您已经获取过邀请码了,请勿重复获取.'
-            session['invitation_code'] = public_code.get('inv_code')
-            return redirect(url_for('public_invitation'))
-
     inv_codes = r_session.smembers('public_invitation_codes')
-    if not inv_codes:
-        session['error_message'] = '暂时没有可用的邀请码,请稍后再试.'
-        return redirect(url_for('public_invitation'))
 
-    for code in inv_codes: continue
-    invitation_code = code.decode('utf-8')
-
-    public_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    body = dict(time=public_time, inv_code=invitation_code, ip=HTTP_X_REAL_IP)
-
-    public_body = public_info.get('diary')
-    public_body.append(body)
-
-    public_info['diary'] = public_body
-
-    r_session.set(public_key, json.dumps(public_info))
-
-    return render_template('register.html', invitation_code=invitation_code)
+    return render_template('public_invitation.html', inv_codes=inv_codes)
 
 
 @app.route('/user/logout')
@@ -134,6 +84,12 @@ def logout():
 
     session.clear()
     return redirect(url_for('login'))
+
+@app.route('/talk')
+@requires_auth
+def user_talk():
+
+    return render_template('talk.html')
     
 type_dict = {'0':'','1':'收取','2':'宝箱','3':'转盘','4':'进攻','5':'复仇','6':'提现','7':'状态'}
 @app.route('/log')
@@ -391,6 +347,46 @@ def user_change_property(field, value):
 
     return redirect(url_for('user_profile'))
 
+@app.route('/user/change_money/<field>', methods=['POST'])
+@requires_auth
+def user_change_money(field):
+    user = session.get('user_info')
+    user_key = '%s:%s' % ('user', user.get('username'))
+
+    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
+
+    if field == 'hardware_outcome':
+        try:
+            user_info['hardware_outcome'] = float(str(request.values.get('hardware_outcome')))
+        except ValueError:
+            return redirect(url_for('moneyAnalyzer'))
+    if field == 'other_outcome':
+        try:
+            user_info['other_outcome'] = float(str(request.values.get('other_outcome')))
+        except ValueError:
+            return redirect(url_for('moneyAnalyzer'))
+    if field == 'daily_outcome':
+        try:
+            user_info['daily_outcome'] = float(str(request.values.get('daily_outcome')))
+        except ValueError:
+            return redirect(url_for('moneyAnalyzer'))
+    if field == 'daily_outcome_start_date':
+        try:
+            start_date=str(request.values.get('daily_outcome_start_date'))
+            datetime.strptime(start_date,'%Y-%m-%d')
+            user_info['daily_outcome_start_date'] = start_date
+        except ValueError:
+            return redirect(url_for('moneyAnalyzer'))
+    if field == 'withdrawn_money_modify':
+        try:
+            user_info['withdrawn_money_modify'] = float(str(request.values.get('withdrawn_money_modify')))
+        except ValueError:
+            return redirect(url_for('moneyAnalyzer'))
+
+    r_session.set(user_key, json.dumps(user_info))
+
+    return redirect(url_for('moneyAnalyzer'))
+
 
 @app.route('/user/change_password', methods=['POST'])
 @requires_auth
@@ -422,53 +418,6 @@ def user_change_password():
     r_session.set(user_key, json.dumps(user_info))
 
     return redirect(url_for('user_profile'))
-
-@app.route('/register')
-def register():
-    if session.get('user_info') is not None:
-        return redirect(url_for('dashboard'))
-
-    err_msg = None
-    if session.get('error_message') is not None:
-        err_msg = session.get('error_message')
-        session['error_message'] = None
-
-    info_msg = None
-    if session.get('info_message') is not None:
-        info_msg = session.get('info_message')
-        session['info_message'] = None
-
-    invitation_code = ''
-    if request.values.get('inv_code') is not None and len(request.values.get('inv_code')) > 0 :
-        invitation_code = request.values.get('inv_code')
-
-    if request.values.get('active') is not None and len(request.values.get('active')) > 0 :
-        active_code = request.values.get('active')
-        try:
-            validate = base64.b64decode(active_code)
-            code = validate.decode('utf-8')
-        except Exception as e:
-            session['error_message'] = '非法参数错误.'
-            return redirect(url_for('register'))
-
-        key = 'activecode:%s' % code
-        activecode = r_session.get(key)
-        if activecode is None:
-            session['error_message'] = '激活帐户链接已失效.'
-            return redirect(url_for('register'))
-
-        user = json.loads(activecode.decode('utf-8'))
-
-        r_session.set('%s:%s' % ('user', user.get('username')), json.dumps(user))
-        r_session.set('%s:%s' % ('record', user.get('username')), json.dumps(dict(diary=[])))
-        r_session.sadd('users', user.get('username'))
-        r_session.sadd('email', user.get('email'))
-        r_session.delete(key)
-
-        session['info_message'] = '恭喜你，注册成功.'
-        return redirect(url_for('register'))
-
-    return render_template('register.html', err_msg=err_msg, info_msg=info_msg, invitation_code=invitation_code)
 
 def user_email(email, key):
     from mailsand import send_email
@@ -506,6 +455,31 @@ def user_email(email, key):
     config_info = json.loads(r_session.get(config_key).decode('utf-8'))
     return send_email(mail,config_info)
 
+@app.route('/register')
+def register():
+    if session.get('user_info') is not None:
+        return redirect(url_for('dashboard'))
+
+    err_msg = None
+    if session.get('error_message') is not None:
+        err_msg = session.get('error_message')
+        session['error_message'] = None
+
+    info_msg = None
+    if session.get('info_message') is not None:
+        info_msg = session.get('info_message')
+        session['info_message'] = None
+
+    invitation_code = ''
+    if request.values.get('inv_code') is not None and len(request.values.get('inv_code')) > 0 :
+        invitation_code = request.values.get('inv_code')
+        if not r_session.sismember('invitation_codes', invitation_code) and \
+                not r_session.sismember('public_invitation_codes', invitation_code):
+            session['error_message'] = '无效的邀请码。'
+
+    return render_template('register.html', err_msg=err_msg, info_msg=info_msg, invitation_code=invitation_code)
+
+
 @app.route('/user/register', methods=['POST'])
 def user_register():
     email = request.values.get('username')
@@ -514,9 +488,9 @@ def user_register():
     password = request.values.get('password')
     re_password = request.values.get('re_password')
 
-    r = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
-    if re.match(r, email) is None:
-        session['error_message'] = '邮箱地址格式不正确.'
+    if not r_session.sismember('invitation_codes', invitation_code) and \
+            not r_session.sismember('public_invitation_codes', invitation_code):
+        session['error_message'] = '无效的邀请码。'
         return redirect(url_for('register'))
 
     if username == '':
@@ -535,41 +509,16 @@ def user_register():
         session['error_message'] = '密码必须8位及以上.'
         return redirect(url_for('register'))
 
-    if r_session.sismember('email', email):
-        session['error_message'] = '该邮件地址已被注册.'
-        return redirect(url_for('register'))
-
-    if not r_session.sismember('invitation_codes', invitation_code) and \
-            not r_session.sismember('public_invitation_codes', invitation_code):
-        session['error_message'] = '无效的邀请码。'
-        return redirect(url_for('register'))
-
-    email_code = r_session.get('emailcode:%s' % email)
-    if email_code is not None:
-        code_time = json.loads(email_code.decode('utf-8'))
-        if datetime.strptime(code_time, '%Y-%m-%d %H:%M:%S') + timedelta(minutes=5) > datetime.now():
-            session['error_message'] = '发送邮件过于频繁 请稍候再试.'
-            return redirect(url_for('register'))
-
-    _chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    key = ''.join(random.sample(_chars, 36))
-    user = dict(username=username, password=hash_password(password), id=str(uuid.uuid1()),
-                active=True, is_admin=False, max_account_no=20, email=email,
-                created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-
-    r_session.setex('emailcode:%s' % email, json.dumps(user.get('created_time')), 60*5)
-    r_session.setex('activecode:%s' % key, json.dumps(user), 60*30)
-
-    bytesString = key.encode('utf-8')
-    encodestr = base64.b64encode(bytesString)
-
-    if user_email(email, encodestr.decode('utf-8')) != True:
-        session['error_message'] = '激活帐户邮件发送失败 邮箱不存在.'
-        return redirect(url_for('register'))
-
     r_session.srem('invitation_codes', invitation_code)
     r_session.srem('public_invitation_codes', invitation_code)
 
-    session['info_message'] = '激活帐户邮件已发送到您的邮箱.'
+    user = dict(username=username, password=hash_password(password), id=str(uuid.uuid1()),
+                active=True, is_admin=False, max_account_no=20,email=email,
+                created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    r_session.set('%s:%s' % ('user', username), json.dumps(user))
+    r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[])))
+    r_session.sadd('users', username)
+
+    session['info_message'] = '恭喜你，注册成功.'
     return redirect(url_for('register'))
 

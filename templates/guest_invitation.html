@@ -18,7 +18,6 @@
                             <thead>
                             <tr>
                                 <th class="col-md-1">时间</th>
-                                <th class="col-md-1">访问IP</th>
                                 <th class="col-md-1">邀请码</th>
                             </tr>
                             </thead>
@@ -27,7 +26,6 @@
                                 <tr>
                                     <td class="hidden-xs">{{ row.time|e }}</td>
                                     <td class="visible-xs">{{ row.time.split(' ')[1] }}</td>
-                                    <td>{{ row.ip|e }}</td>
                                     <td>{{ row.inv_code|e }}</td>
                                 </tr>
                             {% endfor %}

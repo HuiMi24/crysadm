@@ -340,10 +340,12 @@ def DoD_income_xunlei():
         if 'produce_stat' in yesterday_data.keys() and len(yesterday_data['produce_stat'])!=0:
             # 产量柱子开始
             for i in range(1, 25): 
-                if yesterday_data.get('produce_stat')[0].get('hourly_list') is None:
+                if yesterday_data.get('produce_stat')[0].get('hourly_list') is None: 
                     break
                 temp = 0
                 for hourly_produce in yesterday_data.get('produce_stat'):
+                    if i >= len(hourly_produce.get('hourly_list')):
+                        break
                     temp += hourly_produce.get('hourly_list')[i]
                 yesterday_series['data'].append(temp)
             # 产量柱子结束

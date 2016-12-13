@@ -26,8 +26,6 @@ r_session = redis.Redis(connection_pool=pool)
 
 
 # 获取用户数据
-
-
 def get_data(username):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_data')
 
@@ -54,9 +52,9 @@ def get_data(username):
                 return
 
             if mine_info.get('r') != 0:
-
                 success, account_info = __relogin(account_info.get(
-                    'account_name'), account_info.get('password'), account_info, account_key)
+                    'account_name'), account_info.get('password'),
+                    account_info, account_key)
                 if not success:
                     print('get_data:', user_id, 'relogin failed')
                     continue
@@ -919,7 +917,7 @@ if __name__ == '__main__':
             'revenge_crystal_interval': 300 * 60,
             'getaward_crystal_interval': 240 * 60,
             'get_online_user_data_interval': 30,
-            'get_offline_user_data_interval': 600,
+            'get_offline_user_data_interval': 30,
             'clear_offline_user_interval': 60,
             'select_auto_task_user_interval': 10 * 60,
             'auto_detect_interval': 5 * 60,

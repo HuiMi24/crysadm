@@ -104,12 +104,13 @@ def get_data(username):
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
                 return
-            current_hour = 24 - start_time.hour
+            current_hour = start_time.hour
             if 'speed_stat_hourly' not in account_data:
                 account_data['speed_stat_hourly'] = [0] * 24
 
             if start_time.minute == 59:
-                account_data['zqb_speed_stat'][current_hour] = \
+                account_data['zqb_speed_stat'][0:-1] = account_data['zqb_speed_stat'][1:]
+                account_data['zqb_speed_stat'][-1] = \
                     int(account_data.get('speed_stat_hourly')[current_hour]['speed_sum'] /
                         account_data.get('speed_stat_hourly')[current_hour]['cnt']) * 8
                 account_data.get('speed_stat_hourly')[current_hour] = 0

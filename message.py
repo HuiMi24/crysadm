@@ -1,4 +1,3 @@
-__author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
 from auth import requires_admin, requires_auth

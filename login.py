@@ -1,7 +1,6 @@
 #! /usr/bin/env python3.4
 # -*- coding: utf-8 -*-
 # login.py - xunlei user login
-__author__ = 'powergx'
 import requests
 import random
 import json
@@ -56,16 +55,20 @@ def old_login(username, md5_password):
     key = 'C2049664-1E4A-4E1C-A475-977F0E207C9C'
     key_md5 = md5(key)
 
-    device_sign = "div100.%s%s" % (device_id, md5(sha1("%s%s%s%s" % (device_id, appName, businessType, key_md5))))
+    device_sign = "div100.%s%s" % (device_id, md5(
+        sha1("%s%s%s%s" % (device_id, appName, businessType, key_md5))))
 
-    hash_password = hex(pow_mod(StrToInt(md5_password), exponent, modulus))[2:].upper().zfill(256)
+    hash_password = hex(pow_mod(StrToInt(md5_password), exponent, modulus))[
+        2:].upper().zfill(256)
 
     params = param % (61, hash_password, device_sign, 108, username, 1000006)
 
-    r = requests.post("https://login.mobile.reg2t.sandai.net/", data=params, headers=agent_header, verify=False)
+    r = requests.post("https://login.mobile.reg2t.sandai.net/",
+                      data=params, headers=agent_header, verify=False)
     login_status = json.loads(r.text)
 
     return login_status
+
 
 def login(username, md5_password, encrypt_pwd_url=None):
     if encrypt_pwd_url is None or encrypt_pwd_url == '':
@@ -89,7 +92,8 @@ def login(username, md5_password, encrypt_pwd_url=None):
         return old_login(username, md5_password)
     captcha = check_result.split(':')[1].upper()
 
-    params = dict(password=md5_password, captcha=captcha, check_n=check_n, check_e=check_e)
+    params = dict(password=md5_password, captcha=captcha,
+                  check_n=check_n, check_e=check_e)
     urlencode(params)
     r = requests.get(encrypt_pwd_url + '?' + urlencode(params))
     e_pwd = r.text

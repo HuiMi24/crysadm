@@ -1,5 +1,4 @@
 # Html 数据分析
-__author__ = 'powergx'
 from flask import render_template, session, Response
 from crysadm import app, r_session
 from auth import requires_auth
@@ -13,10 +12,12 @@ def __get_speed_stat_chart_data(speed_stat_data):
     speed_stat_category = list()
     speed_stat_value = list()
     for i in range(-24, 0):
-        speed_stat_category.append('%d:00' % (now + timedelta(hours=i + 1)).hour)
+        speed_stat_category.append('%d:00' % (
+            now + timedelta(hours=i + 1)).hour)
 
     for speed_data in speed_stat_data:
-        this_data = dict(name='矿主ID:' + str(speed_data.get('mid')), data=list())
+        this_data = dict(
+            name='矿主ID:' + str(speed_data.get('mid')), data=list())
         speed_stat_value.append(this_data)
 
         dev_speed = speed_data.get('dev_speed')
@@ -46,7 +47,8 @@ def __get_history_speed_data(username):
         day_speed.append([0] * 24)
         for account in history_data.get('speed_stat'):
             day_speed.append(account.get('dev_speed'))
-        value.append(dict(name=str_date, data=[x / 8 for x in [sum(i) for i in zip(*day_speed)]]))
+        value.append(dict(name=str_date, data=[
+                     x / 8 for x in [sum(i) for i in zip(*day_speed)]]))
 
     return value
 
@@ -68,7 +70,8 @@ def __get_speed_comparison_data(history_data, today_data, str_updated_time):
         for account in today_data:
             day_speed.append(account.get('dev_speed'))
 
-        total_speed = [x / 8 for x in [sum(i) for i in zip(*day_speed)]][0 - updated_time.hour:]
+        total_speed = [
+            x / 8 for x in [sum(i) for i in zip(*day_speed)]][0 - updated_time.hour:]
         value.append(dict(name='今天', data=total_speed))
 
     return dict(category=category, value=value)
@@ -82,7 +85,8 @@ def __seven_day_pdc(username):
 
     dict_history_speed = dict()
     for speed in history_speed:
-        dict_history_speed[speed.get('name')] = int(sum(speed.get('data')) / 24)
+        dict_history_speed[speed.get('name')] = int(
+            sum(speed.get('data')) / 24)
 
     speed_column_value = list()
     category = list()
@@ -154,9 +158,11 @@ def analyzer_last_30_day():
         if b_data is None:
             continue
         data = json.loads(b_data.decode('utf-8'))
-        update_date = datetime.strptime(data.get('updated_time')[0:10], '%Y-%m-%d')
+        update_date = datetime.strptime(
+            data.get('updated_time')[0:10], '%Y-%m-%d')
 
-        value.append([int(time.mktime(update_date.timetuple()) * 1000), data.get('pdc')])
+        value.append(
+            [int(time.mktime(update_date.timetuple()) * 1000), data.get('pdc')])
 
     return Response(json.dumps(dict(value=value)), mimetype='application/json')
 
@@ -182,7 +188,8 @@ def analyzer_speed_comparison():
 
     b_today_data = r_session.get(key)
     if b_today_data is None:
-        speed_comparison_data = __get_speed_comparison_data(history_speed, [], '2012-10-04 14:39:00')
+        speed_comparison_data = __get_speed_comparison_data(
+            history_speed, [], '2012-10-04 14:39:00')
     else:
         today_data = json.loads(b_today_data.decode('utf-8'))
         speed_comparison_data = __get_speed_comparison_data(history_speed, today_data.get('speed_stat'),
@@ -229,7 +236,8 @@ def analyzer_speed_stat_chart():
 
     today_data = json.loads(b_data.decode('utf-8'))
 
-    speed_stat_chart = __get_speed_stat_chart_data(today_data.get('speed_stat'))
+    speed_stat_chart = __get_speed_stat_chart_data(
+        today_data.get('speed_stat'))
 
     return Response(json.dumps(speed_stat_chart), mimetype='application/json')
 

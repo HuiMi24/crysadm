@@ -1,4 +1,3 @@
-__author__ = 'powergx'
 from distutils.core import setup
 
 setup(

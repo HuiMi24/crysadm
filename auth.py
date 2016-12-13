@@ -1,8 +1,6 @@
 # API 权限管理
-__author__ = 'powergx'
 from util import hash_password
 import json
-
 from flask import Response, request, session, redirect, url_for
 from functools import wraps
 from crysadm import r_session

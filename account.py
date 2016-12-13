@@ -1,5 +1,4 @@
 # 迅雷帐号绑定html页面
-__author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
 from auth import requires_admin, requires_auth
@@ -23,7 +22,8 @@ def accounts():
 
     account_s = list()
     for acct in sorted(r_session.smembers(accounts_key)):
-        account_key = 'account:%s:%s' % (user.get('username'), acct.decode("utf-8"))
+        account_key = 'account:%s:%s' % (
+            user.get('username'), acct.decode("utf-8"))
         account_info = json.loads(r_session.get(account_key).decode("utf-8"))
         account_s.append(account_info)
 
@@ -53,7 +53,8 @@ def account_add():
             session['error_message'] = '你的账号限制%d个账户。' % account_no
             return redirect(url_for('accounts'))
 
-    login_result = login(account_name, md5_password, app.config.get('ENCRYPT_PWD_URL'))
+    login_result = login(account_name, md5_password,
+                         app.config.get('ENCRYPT_PWD_URL'))
     if login_result.get('errorCode') != 0:
         error_message = login_result.get('errorDesc')
         session['error_message'] = '登陆失败，错误信息：%s。' % error_message
@@ -129,7 +130,8 @@ def account_inactive_all():
 
     accounts_key = 'accounts:%s' % user.get('username')
     for acct in sorted(r_session.smembers(accounts_key)):
-        account_key = 'account:%s:%s' % (user.get('username'), acct.decode("utf-8"))
+        account_key = 'account:%s:%s' % (
+            user.get('username'), acct.decode("utf-8"))
         account_info = json.loads(r_session.get(account_key).decode("utf-8"))
         account_info['active'] = False
         r_session.set(account_key, json.dumps(account_info))
@@ -145,7 +147,8 @@ def account_activel_all():
 
     accounts_key = 'accounts:%s' % user.get('username')
     for acct in sorted(r_session.smembers(accounts_key)):
-        account_key = 'account:%s:%s' % (user.get('username'), acct.decode("utf-8"))
+        account_key = 'account:%s:%s' % (
+            user.get('username'), acct.decode("utf-8"))
         account_info = json.loads(r_session.get(account_key).decode("utf-8"))
         account_info['active'] = True
         r_session.set(account_key, json.dumps(account_info))

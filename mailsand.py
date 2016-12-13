@@ -1,16 +1,17 @@
-__author__ = 'powergx'
 from threading import Thread
 import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
 
-#验证邮箱格式
+
+# 验证邮箱格式
 def validateEmail(email):
     import re
     if len(email) > 7:
         if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
             return 1
     return 0
+
 
 # 异步发送邮件
 def send_async_email(email, config_info):

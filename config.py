@@ -4,15 +4,20 @@
 __author__ = 'powergx'
 
 DEBUG_MODE = False
+
+
 def crys_log(message):
     """Automatically log the current function details."""
     import inspect
     from datetime import datetime
     func = inspect.currentframe().f_back.f_code
     if DEBUG_MODE:
-        print("[%s] [%s:%s]: %s" % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), func.co_name, func.co_firstlineno, message))
+        print("[%s] [%s:%s]: %s" % (datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S'), func.co_name, func.co_firstlineno, message))
+
 
 class RedisConfig():
+
     def __init__(self, host, port, db, password=None):
         self.host = host
         self.port = port

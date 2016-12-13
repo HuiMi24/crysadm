@@ -1,5 +1,4 @@
 # Html － Crysadm 管理员界面
-__author__ = 'powergx'
 from flask import request, Response, render_template, session, url_for, redirect
 from crysadm import app, r_session
 from auth import requires_admin, requires_auth
@@ -11,6 +10,8 @@ import random
 from message import send_msg
 
 # 系统管理 => 用户管理
+
+
 @app.route('/admin/user')
 @requires_admin
 def admin_user():
@@ -24,7 +25,8 @@ def admin_user():
         if user.get('login_as_time') is not None:
             if (datetime.now() - datetime.strptime(user.get('login_as_time'), '%Y-%m-%d %H:%M:%S')).days < 3:
                 recent_login_users.append(user)
-        user['is_online'] = r_session.exists('user:%s:is_online' % user.get('username')) # 临时寄存数据
+        user['is_online'] = r_session.exists(
+            'user:%s:is_online' % user.get('username'))  # 临时寄存数据
         users.append(user)
 
     return render_template('admin_user.html',
@@ -33,12 +35,16 @@ def admin_user():
                            users=users)
 
 # 系统管理 => 通知管理
+
+
 @app.route('/admin/message')
 @requires_admin
 def admin_message():
     return render_template('admin_message.html')
 
 # 系统管理 => 邀请管理
+
+
 @app.route('/admin/invitation')
 @requires_admin
 def admin_invitation():
@@ -48,6 +54,8 @@ def admin_invitation():
     return render_template('admin_invitation.html', inv_codes=inv_codes, public_inv_codes=pub_inv_codes)
 
 # 系统管理 => 邀请管理 => 生成邀请码
+
+
 @app.route('/generate/inv_code', methods=['POST'])
 @requires_admin
 def generate_inv_code():
@@ -60,6 +68,8 @@ def generate_inv_code():
     return redirect(url_for('admin_invitation'))
 
 # 系统管理 => 邀请管理 => 生成公开邀请码
+
+
 @app.route('/generate/pub_inv_code', methods=['POST'])
 @requires_admin
 def generate_pub_inv_code():
@@ -73,6 +83,8 @@ def generate_pub_inv_code():
     return redirect(url_for('admin_invitation'))
 
 # 系统管理 => 用户管理 => 登陆其它用户
+
+
 @app.route('/admin/login_as/<username>', methods=['POST'])
 @requires_admin
 def generate_login_as(username):
@@ -83,11 +95,13 @@ def generate_login_as(username):
 
     if user.get('log_as_body') is not None:
         if len(user.get('log_as_body')) > 0:
-            r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=user.get('log_as_body')))) # 创建新通道,转移原本日记
+            r_session.set('%s:%s' % ('record', username), json.dumps(
+                dict(diary=user.get('log_as_body'))))  # 创建新通道,转移原本日记
             user['log_as_body'] = []
 
     if r_session.get('%s:%s' % ('record', username)) is None:
-        r_session.set('%s:%s' % ('record', username), json.dumps(dict(diary=[]))) # 创建缺失的日记
+        r_session.set('%s:%s' % ('record', username),
+                      json.dumps(dict(diary=[])))  # 创建缺失的日记
 
     r_session.set('%s:%s' % ('user', username), json.dumps(user))
     session['admin_user_info'] = session.get('user_info')
@@ -96,6 +110,8 @@ def generate_login_as(username):
     return redirect(url_for('dashboard'))
 
 # 系统管理 => 用户管理 => 编辑用户资料
+
+
 @app.route('/admin_user/<username>')
 @requires_admin
 def admin_user_management(username):
@@ -109,6 +125,8 @@ def admin_user_management(username):
     return render_template('user_management.html', user=user, err_msg=err_msg)
 
 # 系统管理 => 用户管理 => 编辑用户资料 => 修改密码
+
+
 @app.route('/admin/change_password/<username>', methods=['POST'])
 @requires_admin
 def admin_change_password(username):
@@ -127,6 +145,8 @@ def admin_change_password(username):
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
 # 系统管理 => 用户管理 => 编辑用户资料 => 修改其它属性
+
+
 @app.route('/admin/change_property/<field>/<value>/<username>', methods=['POST'])
 @requires_admin
 def admin_change_property(field, value, username):
@@ -169,6 +189,8 @@ def admin_change_property(field, value, username):
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
 # 系统管理 => 用户管理 => 编辑用户资料 => 提示信息
+
+
 @app.route('/admin/change_user_info/<username>', methods=['POST'])
 @requires_admin
 def admin_change_user_info(username):
@@ -194,6 +216,8 @@ def admin_change_user_info(username):
     return redirect(url_for(endpoint='admin_user_management', username=username))
 
 # 系统管理 => 用户管理 => 删除用户
+
+
 @app.route('/admin/del_user/<username>', methods=['GET'])
 @requires_admin
 def admin_del_user(username):
@@ -217,6 +241,8 @@ def admin_del_user(username):
     return redirect(url_for('admin_user'))
 
 # 系统管理 => 用户管理 => 无用户？
+
+
 @app.route('/none_user')
 @requires_admin
 def none_user():
@@ -230,7 +256,8 @@ def none_user():
         has_active_account = False
         for b_xl_account in r_session.smembers('accounts:' + username):
             xl_account = b_xl_account.decode('utf-8')
-            account = json.loads(r_session.get('account:%s:%s' % (username, xl_account)).decode('utf-8'))
+            account = json.loads(r_session.get(
+                'account:%s:%s' % (username, xl_account)).decode('utf-8'))
             if account.get('active'):
                 has_active_account = True
                 break
@@ -240,6 +267,8 @@ def none_user():
     return json.dumps(dict(none_xlAcct=none_xlAcct, none_active_xlAcct=none_active_xlAcct))
 
 # 系统管理 -> 用户管理 -> 删除无矿机的用户
+
+
 @app.route('/admin/clear_no_device_user', methods=['POST'])
 @requires_admin
 def admin_clear_no_device_user():
@@ -247,10 +276,12 @@ def admin_clear_no_device_user():
         username = b_user.decode('utf-8')
         accounts_count = r_session.smembers('accounts:%s' % username)
         if accounts_count is None or len(accounts_count) == 0:
-             admin_del_user(username)
+            admin_del_user(username)
         return redirect(url_for('admin_user'))
 
 # 系统管理 => 用户管理 => 删除无用户？
+
+
 @app.route('/del_none_user', methods=['POST'])
 @requires_admin
 def del_none_user():
@@ -263,7 +294,8 @@ def del_none_user():
         has_active_account = False
         for b_xl_account in r_session.smembers('accounts:' + username):
             xl_account = b_xl_account.decode('utf-8')
-            account = json.loads(r_session.get('account:%s:%s' % (username, xl_account)).decode('utf-8'))
+            account = json.loads(r_session.get(
+                'account:%s:%s' % (username, xl_account)).decode('utf-8'))
             if account.get('active'):
                 has_active_account = True
                 break
@@ -273,6 +305,8 @@ def del_none_user():
     return redirect(url_for('admin_user'))
 
 # 系统管理 => 通知管理 => 发送通知
+
+
 @app.route('/admin/message/send', methods=['POST'])
 @requires_admin
 def admin_message_send():
@@ -296,12 +330,14 @@ def admin_message_send():
     send_content = '{:<30}'.format(summary) + content
     if to == 'all':
         for b_username in r_session.smembers('users'):
-            send_msg(b_username.decode('utf-8'), subject, send_content, 3600 * 24 * 7)
+            send_msg(b_username.decode('utf-8'), subject,
+                     send_content, 3600 * 24 * 7)
 
     else:
         send_msg(to, subject, send_content, 3600 * 24)
 
     return redirect(url_for(endpoint='admin_message'))
+
 
 @app.route('/admin/test_email', methods=['POST'])
 @requires_admin
@@ -317,13 +353,13 @@ def test_email():
 
     session['action'] = 'info'
     if 'email' not in user_info.keys() or not validateEmail(user_info["email"]):
-       session['error_message']='该账户的提醒邮件地址设置不正确，无法测试'
-       return redirect(url_for('system_config'))
+        session['error_message'] = '该账户的提醒邮件地址设置不正确，无法测试'
+        return redirect(url_for('system_config'))
     mail = dict()
     mail['to'] = user_info['email']
     mail['subject'] = '云监工-测试邮件'
     mail['text'] = '这只是一个测试邮件，你更应该关注的不是这里面写了什么。不是么？'
-    send_email(mail,config_info)
+    send_email(mail, config_info)
     return redirect(url_for('system_config'))
 
 
@@ -345,6 +381,8 @@ def system_config():
     return render_template('admin_settings.html', user_info=config_info, err_msg=err_msg, action=action)
 
 # 站长交流
+
+
 @app.route('/talk')
 @requires_admin
 def admin_talk():
@@ -352,6 +390,8 @@ def admin_talk():
     return render_template('talk.html')
 
 # 站点监控 => 站点记录
+
+
 @app.route('/guest')
 @requires_admin
 def admin_guest():
@@ -370,6 +410,8 @@ def admin_guest():
     return render_template('guest.html', guest_as=guest_as)
 
 # 系统管理 => 删除站点记录
+
+
 @app.route('/guest/delete')
 @requires_admin
 def admin_guest_delete():
@@ -384,6 +426,8 @@ def admin_guest_delete():
     return redirect(url_for('admin_guest'))
 
 # 站点监控 => 邀请记录
+
+
 @app.route('/guest/invitation')
 @requires_admin
 def guest_invitation():
@@ -402,6 +446,8 @@ def guest_invitation():
     return render_template('guest_invitation.html', public_as=public_as)
 
 # 站点监控 => 删除邀请记录
+
+
 @app.route('/guest/invitation/delete')
 @requires_admin
 def guest_invitation_delete():
@@ -416,6 +462,8 @@ def guest_invitation_delete():
     return redirect(url_for('guest_invitation'))
 
 # 系统管理 => 关于
+
+
 @app.route('/about')
 @requires_admin
 def admin_about():

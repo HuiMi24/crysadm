@@ -2,7 +2,16 @@
 # -*- coding: utf-8 -*-
 # crysadm.py - main entance for web GUI
 from flask import Flask
-import config, socket, redis
+import config
+import socket
+import redis
+from admin import *
+from user import *
+from web_common import *
+from account import *
+from excavator import *
+from message import *
+from analyzer import *
 
 app = Flask(__name__)
 
@@ -17,16 +26,11 @@ else:
 
 app.config.from_object(config.ProductionConfig)
 redis_conf = app.config.get('REDIS_CONF')
-pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port, db=redis_conf.db, password=redis_conf.password)
+pool = redis.ConnectionPool(host=redis_conf.host, port=redis_conf.port,
+                            db=redis_conf.db, password=redis_conf.password)
 r_session = redis.Redis(connection_pool=pool)
 
-from admin import *
-from user import *
-from web_common import *
-from account import *
-from excavator import *
-from message import *
-from analyzer import *
 
 if __name__ == '__main__':
-    app.run(host=app.config.get('SERVER_IP'), port=app.config.get('SERVER_PORT'))
+    app.run(host=app.config.get('SERVER_IP'),
+            port=app.config.get('SERVER_PORT'))

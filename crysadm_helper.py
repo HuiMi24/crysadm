@@ -104,7 +104,7 @@ def get_data(username):
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
                 return
-            current_hour = start_time.hour
+            current_hour = 24 - start_time.hour
             if 'speed_stat_hourly' not in account_data:
                 account_data['speed_stat_hourly'] = [0] * 24
 

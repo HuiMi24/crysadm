@@ -81,9 +81,11 @@ def get_data(username):
             if account_data.get('updated_time') is not None:
                 last_updated_time = datetime.strptime(account_data.get('updated_time'), '%Y-%m-%d %H:%M:%S')
                 if last_updated_time.hour != datetime.now().hour:
-                    account_data['zqb_speed_stat'] = get_speed_stat(cookies)
+                    pass
+                    #account_data['zqb_speed_stat'] = get_speed_stat(cookies)
             else:
-                account_data['zqb_speed_stat'] = get_speed_stat(cookies)
+                pass
+                #account_data['zqb_speed_stat'] = get_speed_stat(cookies)
 
             account_data['updated_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             account_data['mine_info'] = mine_info
@@ -95,7 +97,26 @@ def get_data(username):
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
                 return
+            current_hour = start_time.hour
+            if 'speed_stat_hourly' not in account_data:
+                account_data['speed_stat_hourly'] = [0] * 24
 
+            if start_time.minute == 59:
+                account_data['zqb_speed_stat'][current_hour] = int(account_data.get('speed_stat_hourly')[current_hour]['speed_sum'] /\
+                                                               account_data.get('speed_stat_hourly')[current_hour]['cnt']) * 8
+                account_data.get('speed_stat_hourly')[current_hour] = 0
+            else:
+                if account_data.get('speed_stat_hourly')[current_hour] == 0:
+                    account_data.get('speed_stat_hourly')[current_hour] = dict(speed_sum = 0, cnt = 0)
+                else:
+                    for device in account_data.get('device_info'):
+                        speed_sum = int(account_data.get('speed_stat_hourly')[current_hour].get('speed_sum'))
+                        cnt = int(account_data.get('speed_stat_hourly')[current_hour].get('cnt'))
+                        speed_sum += int(int(device.get('dcdn_upload_speed')) / 1024)
+                        cnt += 1
+                        account_data.get('speed_stat_hourly')[current_hour]['speed_sum'] = speed_sum
+                        account_data.get('speed_stat_hourly')[current_hour]['cnt'] = cnt
+                        
             r_session.set(account_data_key, json.dumps(account_data))
             if not r_session.exists('can_drawcash'):
                 r = get_can_drawcash(cookies=cookies)

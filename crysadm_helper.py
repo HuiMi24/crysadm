@@ -9,7 +9,6 @@ from multiprocessing import Process
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
 from api import *
-_author__ = 'powergx'
 
 conf = None
 if socket.gethostname() == 'GXMBP.local':
@@ -88,10 +87,8 @@ def get_data(username):
                     account_data.get('updated_time'), '%Y-%m-%d %H:%M:%S')
                 if last_updated_time.hour != datetime.now().hour:
                     pass
-                    # account_data['zqb_speed_stat'] = get_speed_stat(cookies)
             else:
                 pass
-                # account_data['zqb_speed_stat'] = get_speed_stat(cookies)
 
             account_data['updated_time'] = datetime.now(
             ).strftime('%Y-%m-%d %H:%M:%S')
@@ -104,6 +101,10 @@ def get_data(username):
             if is_api_error(account_data.get('income')):
                 print('get_data:', user_id, 'income', 'error')
                 return
+
+            if 'zqb_speed_stat' not in account_data:
+                account_data['zqb_speed_stat'] = [0] * 24
+
             current_hour = start_time.hour
             if 'speed_stat_hourly' not in account_data:
                 account_data['speed_stat_hourly'] = [0] * 24
@@ -269,9 +270,8 @@ def save_income_history(username, pdc_detail):
 
     r_session.setex(key, json.dumps(income_history), 3600 * 72)
 
+
 # 重新登录
-
-
 def __relogin(username, password, account_info, account_key):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
           username.encode('utf-8'), 'relogin')
@@ -288,9 +288,8 @@ def __relogin(username, password, account_info, account_key):
     r_session.set(account_key, json.dumps(account_info))
     return True, account_info
 
+
 # 获取在线用户数据
-
-
 def get_online_user_data():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_online_user_data')
     if r_session.exists('api_error_info'):
@@ -303,9 +302,8 @@ def get_online_user_data():
     pool.close()
     pool.join()
 
+
 # 获取离线用户数据
-
-
 def get_offline_user_data():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'get_offline_user_data')
     if r_session.exists('api_error_info'):
@@ -333,9 +331,8 @@ def get_offline_user_data():
     pool.close()
     pool.join()
 
+
 # 从在线用户列表中清除离线用户
-
-
 def clear_offline_user():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'clear_offline_user')
     for b_username in r_session.smembers('global:online.users'):
@@ -343,9 +340,8 @@ def clear_offline_user():
         if not r_session.exists('user:%s:is_online' % username):
             r_session.srem('global:online.users', username)
 
+
 # 刷新选择自动任务的用户
-
-
 def select_auto_task_user():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'select_auto_task_user')
     auto_collect_accounts = []
@@ -414,9 +410,8 @@ def select_auto_task_user():
     if len(auto_report_accounts) != 0:
         r_session.sadd('global:auto.report.cookies', *auto_report_accounts)
 
+
 # 执行检测收益报告函数
-
-
 def check_report(user, cookies, user_info):
     from mailsand import send_email
     from mailsand import validateEmail
@@ -650,9 +645,8 @@ def check_collect(user, cookies, user_info):
         red_log(user, '自动执行', '收取', log)
     time.sleep(3)
 
+
 # 执行自动提现的函数
-
-
 def check_drawcash(user, cookies, user_info):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_drawcash')
     if 'draw_money_modify' in user_info.keys():
@@ -663,9 +657,8 @@ def check_drawcash(user, cookies, user_info):
     red_log(user, '自动执行', '提现', r.get('rd'))
     time.sleep(3)
 
+
 # 执行免费宝箱函数
-
-
 def check_giftbox(user, cookies, user_info):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_giftbox')
     box_info = api_giftbox(cookies)
@@ -690,9 +683,8 @@ def check_giftbox(user, cookies, user_info):
         red_log(user, '自动执行', '宝箱', log)
     time.sleep(3)
 
+
 # 执行秘银进攻函数
-
-
 def check_searcht(user, cookies, user_info):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_searcht')
     r = api_sys_getEntry(cookies)
@@ -717,9 +709,8 @@ def check_searcht(user, cookies, user_info):
         red_log(user, '自动执行', '进攻', log)
     time.sleep(3)
 
+
 # 执行秘银复仇函数
-
-
 def check_revenge(user, cookies, user_info):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_revenge')
     r = api_steal_stolenSilverHistory(cookies)
@@ -745,9 +736,8 @@ def check_revenge(user, cookies, user_info):
             red_log(user, '自动执行', '复仇', log)
     time.sleep(3)
 
+
 # 执行幸运转盘函数
-
-
 def check_getaward(user, cookies, user_info):
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'check_getaward')
     r = api_getconfig(cookies)
@@ -763,19 +753,14 @@ def check_getaward(user, cookies, user_info):
         red_log(user, '自动执行', '转盘', log)
     time.sleep(3)
 
+
 # 收取水晶
-
-
 def collect_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'collect_crystal')
-
     cookies_auto(check_collect, 'global:auto.collect.cookies')
-#    for cookie in r_session.smembers('global:auto.collect.cookies'):
-#        check_collect(json.loads(cookie.decode('utf-8')))
+
 
 # 自动提现
-
-
 def drawcash_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'drawcash_crystal')
     time_now = datetime.now()
@@ -783,69 +768,46 @@ def drawcash_crystal():
         return
     if int(time_now.hour) < 12 or int(time_now.hour) > 18:
         return
-
     cookies_auto(check_drawcash, 'global:auto.drawcash.cookies')
-#    for cookie in r_session.smembers('global:auto.drawcash.cookies'):
-#        check_drawcash(json.loads(cookie.decode('utf-8')))
+
 
 # 免费宝箱
-
-
 def giftbox_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'giftbox_crystal')
-
     cookies_auto(check_giftbox, 'global:auto.giftbox.cookies')
-#    for cookie in r_session.smembers('global:auto.giftbox.cookies'):
-#        check_giftbox(json.loads(cookie.decode('utf-8')))
+
 
 # 秘银进攻
-
-
 def searcht_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'searcht_crystal')
-
     cookies_auto(check_searcht, 'global:auto.searcht.cookies')
-#    for cookie in r_session.smembers('global:auto.searcht.cookies'):
-#        check_searcht(json.loads(cookie.decode('utf-8')))
+
 
 # 秘银复仇
-
-
 def revenge_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'revenge_crystal')
-
     cookies_auto(check_revenge, 'global:auto.revenge.cookies')
-#    for cookie in r_session.smembers('global:auto.searcht.cookies'):
-#        check_searcht(json.loads(cookie.decode('utf-8')))
+
 
 # 幸运转盘
-
-
 def getaward_crystal():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'getaward_crystal')
-
     cookies_auto(check_getaward, 'global:auto.getaward.cookies')
-#    for cookie in r_session.smembers('global:auto.getaward.cookies'):
-#        check_getaward(json.loads(cookie.decode('utf-8')))
+
 
 # 自动监测
-
-
 def auto_detect():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'auto_detect')
-
     cookies_auto(detect_exception, 'global:auto.detect.cookies')
 
+
 # 自动报告
-
-
 def auto_report():
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'auto_report')
     cookies_auto(check_report, 'global:auto.report.cookies')
 
+
 # 处理函数[重组]
-
-
 def cookies_auto(func, cookiename):
     users = r_session.smembers(cookiename)
     if users is not None and len(users) > 0:
@@ -860,9 +822,8 @@ def cookies_auto(func, cookiename):
                 print(e)
                 continue
 
+
 # 正则过滤+URL转码
-
-
 def regular_html(info):
     import re
     from urllib.parse import unquote
@@ -870,9 +831,8 @@ def regular_html(info):
     url = unquote(info)
     return regular.sub("", url)
 
+
 # 自动日记记录
-
-
 def red_log(cook, clas, type, gets):
     user = cook.get('user_info')
 
@@ -898,9 +858,8 @@ def red_log(cook, clas, type, gets):
 
     r_session.set(record_key, json.dumps(record_info))
 
+
 # 计时器函数，定期执行某个线程，时间单位为秒
-
-
 def timer(func, seconds):
     while True:
         Process(target=func).start()

@@ -363,51 +363,6 @@ def user_change_property(field, value):
     return redirect(url_for('user_profile'))
 
 
-@app.route('/user/change_money/<field>', methods=['POST'])
-@requires_auth
-def user_change_money(field):
-    user = session.get('user_info')
-    user_key = '%s:%s' % ('user', user.get('username'))
-
-    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
-
-    if field == 'hardware_outcome':
-        try:
-            user_info['hardware_outcome'] = float(
-                str(request.values.get('hardware_outcome')))
-        except ValueError:
-            return redirect(url_for('moneyAnalyzer'))
-    if field == 'other_outcome':
-        try:
-            user_info['other_outcome'] = float(
-                str(request.values.get('other_outcome')))
-        except ValueError:
-            return redirect(url_for('moneyAnalyzer'))
-    if field == 'daily_outcome':
-        try:
-            user_info['daily_outcome'] = float(
-                str(request.values.get('daily_outcome')))
-        except ValueError:
-            return redirect(url_for('moneyAnalyzer'))
-    if field == 'daily_outcome_start_date':
-        try:
-            start_date = str(request.values.get('daily_outcome_start_date'))
-            datetime.strptime(start_date, '%Y-%m-%d')
-            user_info['daily_outcome_start_date'] = start_date
-        except ValueError:
-            return redirect(url_for('moneyAnalyzer'))
-    if field == 'withdrawn_money_modify':
-        try:
-            user_info['withdrawn_money_modify'] = float(
-                str(request.values.get('withdrawn_money_modify')))
-        except ValueError:
-            return redirect(url_for('moneyAnalyzer'))
-
-    r_session.set(user_key, json.dumps(user_info))
-
-    return redirect(url_for('moneyAnalyzer'))
-
-
 @app.route('/user/change_password', methods=['POST'])
 @requires_auth
 def user_change_password():

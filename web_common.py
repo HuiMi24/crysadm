@@ -231,9 +231,8 @@ def dashboard_today_income_share():
 
     return Response(json.dumps(dict(data=pie_data)), mimetype='application/json')
 
+
 # 同比产量
-
-
 @app.route('/dashboard/DoD_income')
 @requires_auth
 def dashboard_DoD_income():
@@ -248,9 +247,9 @@ def dashboard_DoD_income():
         dod_income = DoD_income_xunlei()
 
     return dod_income
+
+
 # 默认统计
-
-
 def DoD_income_yuanjiangong():
     user = session.get('user_info')
     username = user.get('username')
@@ -329,9 +328,8 @@ def DoD_income_yuanjiangong():
     else:
         return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
 
+
 # 迅雷统计
-
-
 def DoD_income_xunlei():
     user = session.get('user_info')
     username = user.get('username')
@@ -422,16 +420,14 @@ def DoD_income_xunlei():
     else:
         return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
 
+
 # 显示登录界面
-
-
 @app.route('/')
 def index():
     return redirect(url_for('login'))
 
+
 # 显示crysadm管理员界面（初次登录）
-
-
 @app.route('/install')
 def install():
     import random
@@ -454,9 +450,8 @@ def install():
 
     return redirect(url_for('login'))
 
+
 # 添加用户
-
-
 @app.context_processor
 def add_function():
     def convert_to_yuan(crystal_values):
@@ -480,9 +475,8 @@ def add_function():
 
     return dict(convert_to_yuan=convert_to_yuan, get_device_type=get_device_type, int2ip=int2ip, convert_to_yuanjiaofen=convert_to_yuanjiaofen)
 
+
 # 显示消息框
-
-
 @app.context_processor
 def message_box():
     if session is None or session.get('user_info') is None:
@@ -563,70 +557,3 @@ def accounts_count():
     accounts_count = dict(users=users, accounts=accounts, accountsk=accountsk)
     r_session.setex(count_key, json.dumps(accounts_count), 120)
     return dict(accounts_count=accounts_count)
-
-
-@app.route('/money')
-@requires_auth
-def moneyAnalyzer():
-    user = session.get('user_info')
-    username = user.get('username')
-
-    user_key = '%s:%s' % ('user', username)
-    user_info = json.loads(r_session.get(user_key).decode('utf-8'))
-
-    data_money = dict(balance=0, sevenDaysAverage=0, total_income_money=0, daily_profit=0,
-                      daily_outcome_total=0, outcome_total=0, estimated_recover_days=0)
-    value = 0
-    counter = 0
-    today = datetime.today()
-    for b_data in r_session.mget(
-            *['user_data:%s:%s' % (username, (today + timedelta(days=i)).strftime('%Y-%m-%d')) for i in range(-7, 0)]):
-        if b_data is None:
-            continue
-        counter += 1
-        data_money = json.loads(b_data.decode('utf-8'))
-        value += data_money.get('pdc')
-    if counter != 0:
-        data_money['sevenDaysAverage'] = value / counter
-
-    str_today = datetime.now().strftime('%Y-%m-%d')
-    key = 'user_data:%s:%s' % (username, str_today)
-    b_data = r_session.get(key)
-    if b_data is not None:
-        data_money['balance'] = json.loads(
-            b_data.decode('utf-8')).get('balance')
-
-    try:
-        data_money['total_income_money'] = user_info[
-            'withdrawn_money_modify'] * 10000 + data_money['balance']
-    except KeyError:
-        data_money['total_income_money'] = 0
-    try:
-        data_money['daily_profit'] = data_money[
-            'sevenDaysAverage'] - user_info['daily_outcome'] * 10000
-    except KeyError:
-        data_money['daily_profit'] = 0
-    try:
-        startDay = datetime.strptime(
-            user_info['daily_outcome_start_date'], '%Y-%m-%d')
-        days_delta = (datetime.now() - startDay).days
-    except KeyError:
-        days_delta = 0
-    try:
-        data_money['daily_outcome_total'] = user_info[
-            'daily_outcome'] * days_delta * 10000
-    except KeyError:
-        data_money['daily_outcome_total'] = 0
-    try:
-        data_money['outcome_total'] = data_money['daily_outcome_total'] + \
-            (user_info['hardware_outcome'] +
-             user_info['other_outcome']) * 10000
-    except KeyError:
-        data_money['outcome_total'] = 0
-    data_money['total_profit'] = (
-        data_money['total_income_money'] - data_money['outcome_total'])
-    if data_money['daily_profit'] != 0:
-        data_money['estimated_recover_days'] = int(
-            data_money['total_profit'] / data_money['daily_profit']) * (-1)
-
-    return render_template('money.html', data_money=data_money, user_info=user_info)

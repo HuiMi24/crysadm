@@ -43,9 +43,8 @@ def __get_yesterday_pdc(username):
 
     return yesterday_m_pdc, yesterday_w_pdc, yesterday_m_award_income, yesterday_w_award_income
 
+
 # 显示控制面板
-
-
 @app.route('/dashboard')
 @requires_auth
 def dashboard():
@@ -57,9 +56,8 @@ def dashboard():
 
     return render_template('dashboard.html', user_info=user_info)
 
+
 # 刷新控制面板数据
-
-
 @app.route('/dashboard_data')
 @requires_auth
 def dashboard_data():
@@ -116,9 +114,8 @@ def dashboard_data():
         today_data['w_award_income'] = today_data.get('m_award_income')
     return Response(json.dumps(dict(today_data=today_data)), mimetype='application/json')
 
+
 # 刷新控制面板图表速度数据
-
-
 @app.route('/dashboard/speed_share')
 @requires_auth
 def dashboard_speed_share():
@@ -249,6 +246,67 @@ def dashboard_DoD_income():
     return dod_income
 
 
+# upload data
+def get_upload_data():
+    user = session.get('user_info')
+    username = user.get('username')
+
+    today_upload_data_series = dict(data=[])
+    yesterday_upload_data_series = dict(data=[])
+
+    now = datetime.now()
+
+    key = 'user_data:%s:%s' % (username, now.strftime('%Y-%m-%d'))
+    b_today_data = r_session.get(key)
+    if b_today_data is None:
+        today_upload_data_series['data'] = []
+        return Response(json.dumps(dict(data=[])), mimetype='application/json')
+    else:
+        today_data = json.loads(b_today_data.decode('utf-8'))
+        today_upload_data_series['data'] = []
+        # upload data start
+        today_speed_data = today_data.get('speed_stat')
+        for i in range(24 - now.hour, 24):
+            if today_speed_data is not None:
+                today_upload_data_series['data'].append(
+                    sum(row.get('dev_speed')[i] for row in today_speed_data) *
+                    3600)
+            else:
+                today_upload_data_series['data'] = []
+        # # upload data end
+
+    key = 'user_data:%s:%s' % (
+        username, (now + timedelta(days=-1)).strftime('%Y-%m-%d'))
+    b_yesterday_data = r_session.get(key)
+    if b_yesterday_data is None:
+        yesterday_upload_data_series['data'] = []
+    else:
+        yesterday_data = json.loads(b_yesterday_data.decode('utf-8'))
+        yesterday_upload_data_series['data'] = []
+        yesterday_speed_data = yesterday_data.get('speed_stat')
+        # upload data start
+        for i in range(0, 24):
+            if yesterday_speed_data is not None:
+                yesterday_upload_data_series['data'].append(
+                    sum(row.get('dev_speed')[i] for row in yesterday_speed_data) *
+                    3600)
+            else:
+                yesterday_upload_data_series['data'] = []
+        # upload data end
+
+    today_upload = sum(today_upload_data_series.get('data')) / 1024 / 1024
+    yesterday_upload = sum(
+        yesterday_upload_data_series.get('data')) / 1024 / 1024
+    yesterday_dod = sum(yesterday_upload_data_series.get(
+        'data')[0:now.hour]) / 1024 / 1024
+    dod_upload = yesterday_upload / yesterday_dod * today_upload
+    dod_upload += yesterday_upload_data_series.get(
+        'data')[now.hour] / 1024 / 1024 * now.minute / 60
+
+    return ("%.2f GB" % today_upload, "%.2f GB" % yesterday_upload,
+            "%.2f GB" % dod_upload)
+
+
 # 默认统计
 def DoD_income_yuanjiangong():
     user = session.get('user_info')
@@ -321,12 +379,14 @@ def DoD_income_yuanjiangong():
     dod_income_value += int((yesterday_series['data']
                              [now.hour]) / 60 * now.minute)
 
+    today_upload, yesterday_upload, dod_upload = get_upload_data()
+
     user_key = '%s:%s' % ('user', user.get('username'))
     user_info = json.loads(r_session.get(user_key).decode('utf-8'))
     if 'is_show_speed_data' in user_info.keys() and user_info['is_show_speed_data'] == False:
-        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
+        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income, last_day_upload=yesterday_upload, today_upload=today_upload, dod_upload=dod_upload))), mimetype='application/json')
     else:
-        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
+        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income, last_day_upload=yesterday_upload, today_upload=today_upload, dod_upload=dod_upload))), mimetype='application/json')
 
 
 # 迅雷统计
@@ -359,9 +419,9 @@ def DoD_income_xunlei():
                 temp += hourly_produce.get('hourly_list')[i]
             today_series['data'].append(temp)
         # 产量柱子结束
-            today_speed_data = today_data.get('speed_stat')
+        today_speed_data = today_data.get('speed_stat')
         # 速度曲线开始
-        for i in range(24-now.hour, 24):
+        for i in range(24 - now.hour, 24):
             if today_speed_data is not None:
                 today_speed_series['data'].append(
                     sum(row.get('dev_speed')[i] for row in today_speed_data))
@@ -413,12 +473,14 @@ def DoD_income_xunlei():
         dod_income_value += int((yesterday_series['data']
                                  [now.hour]) / 60 * now.minute)
 
+    today_upload, yesterday_upload, dod_upload = get_upload_data()
+
     user_key = '%s:%s' % ('user', user.get('username'))
     user_info = json.loads(r_session.get(user_key).decode('utf-8'))
     if 'is_show_speed_data' in user_info.keys() and user_info['is_show_speed_data'] == False:
-        return Response(json.dumps(dict(series=[yesterday_series, today_series, yesterday_speed_series, today_speed_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
+        return Response(json.dumps(dict(series=[yesterday_series, today_series, yesterday_speed_series, today_speed_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income, last_day_upload=yesterday_upload, today_upload=today_upload, dod_upload=dod_upload))), mimetype='application/json')
     else:
-        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income))), mimetype='application/json')
+        return Response(json.dumps(dict(series=[yesterday_series, today_series], data=dict(last_day_income=yesterday_last_value, dod_income_value=dod_income_value, expected_income=expected_income, last_day_upload=yesterday_upload, today_upload=today_upload, dod_upload=dod_upload))), mimetype='application/json')
 
 
 # 显示登录界面

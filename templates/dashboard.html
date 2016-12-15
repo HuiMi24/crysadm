@@ -12,6 +12,16 @@
                 width:30%;
 
             }
+            #upload_info>ul{
+                margin-top:0px;
+                margin-bottom:20px;
+                margin-left:10%;
+            }
+            #upload_info>ul >li{
+                display: inline-block;
+                width:30%;
+
+            }
         }
     </style>
 {% endblock %}
@@ -160,10 +170,10 @@
                 </div>
                 <div class="ibox-content">
                     <div class="row">
-                        <div class="col-md-10">
+                        <div class="col-md-9">
                             <div id="DoD-income" style="height: 200px;min-width: 300px;"></div>
                         </div>
-                        <div class="col-md-2" id="expected_info">
+                        <div class="col-md-1" id="expected_info">
                             <ul class="stat-list" style="margin-top:15px;">
                                 <li>
                                     <h2 class="no-margins " id="dod_income">-</h2>
@@ -176,6 +186,22 @@
                                 <li>
                                     <h2 class="no-margins " id="expected_income">-</h2>
                                     <small>今日预计产量</small>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-2" id="upload_info">
+                            <ul class="stat-list" style="margin-top:15px;">
+                                <li>
+                                    <h2 class="no-margins " id="today_upload">-</h2>
+                                    <small>当前同比上传</small>
+                                </li>
+                                <li>
+                                    <h2 class="no-margins" id="last_day_upload">-</h2>
+                                    <small>昨日总上传</small>
+                                </li>
+                                <li>
+                                    <h2 class="no-margins " id="dod_upload">-</h2>
+                                    <small>今日预计上传</small>
                                 </li>
                             </ul>
                         </div>
@@ -531,6 +557,9 @@
                 $('#last_day_income').html(data.data.last_day_income);
                 $('#dod_income').html(data.data.dod_income_value);
                 $('#expected_income').html(data.data.expected_income);
+                $('#last_day_upload').html(data.data.last_day_upload);
+                $('#today_upload').html(data.data.today_upload);
+                $('#dod_upload').html(data.data.dod_upload);
 
             });
 

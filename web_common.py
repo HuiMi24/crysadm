@@ -303,8 +303,8 @@ def get_upload_data():
     dod_upload += yesterday_upload_data_series.get(
         'data')[now.hour] / 1024 / 1024 * now.minute / 60
 
-    return ("%.2f GB" % today_upload, "%.2f GB" % yesterday_upload,
-            "%.2f GB" % dod_upload)
+    return ("%.2f GB" % (today_upload / 8), "%.2f GB" % (yesterday_upload / 8),
+            "%.2f GB" % (dod_upload / 8))
 
 
 # 默认统计

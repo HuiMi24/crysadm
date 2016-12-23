@@ -438,27 +438,26 @@ def DoD_income_xunlei():
     else:
         yesterday_data = json.loads(b_yesterday_data_new.decode('utf-8'))
         yesterday_series['data'] = []
-        if 'produce_stat' in yesterday_data.keys() and len(yesterday_data['produce_stat']) != 0:
+        hourly_produce = [0] * 24
+        if 'produce_stat' in yesterday_data:
             # 产量柱子开始
-            for i in range(1, 25):
-                if yesterday_data.get('produce_stat')[0].get('hourly_list') is None:
+            for device_produce in yesterday_data.get('produce_stat'):
+                if device_produce.get('hourly_list') is None:
                     break
-                temp = 0
-                for hourly_produce in yesterday_data.get('produce_stat'):
-                    if i >= len(hourly_produce.get('hourly_list')):
-                        break
-                    temp += hourly_produce.get('hourly_list')[i]
-                yesterday_series['data'].append(temp)
+                for i in range(1, 25):
+                    hourly_produce[
+                        i - 1] += device_produce.get('hourly_list')[i]
             # 产量柱子结束
-                yesterday_speed_data = yesterday_data.get('speed_stat')
-            # 速度曲线开始
-            for i in range(0, 24):
-                if yesterday_speed_data is not None:
-                    yesterday_speed_series['data'].append(
-                        sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
-                else:
-                    yesterday_speed_series['data'] = []
-            # 速度曲线结束
+        yesterday_series['data'] = hourly_produce
+        yesterday_speed_data = yesterday_data.get('speed_stat')
+        # 速度曲线开始
+        for i in range(0, 24):
+            if yesterday_speed_data is not None:
+                yesterday_speed_series['data'].append(
+                    sum(row.get('dev_speed')[i] for row in yesterday_speed_data))
+            else:
+                yesterday_speed_series['data'] = []
+        # 速度曲线结束
 
     now_income_value = sum(today_series['data'][0:now.hour])
     dod_income_value = sum(yesterday_series['data'][0:now.hour])

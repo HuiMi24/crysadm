@@ -12,7 +12,7 @@
 
 ```bash
 sudo apt-get install nginx redis-server -y
-sudo python3.4 -m pip install uwsgi flask requests
+sudo python3.4 -m pip install uwsgi flask requests redis
 ```
 创建云监工存放目录/var/www/crysadm
 ```bash

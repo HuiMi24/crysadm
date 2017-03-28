@@ -274,12 +274,14 @@ def get_upload_data():
             else:
                 today_upload_data_series['data'] = []
         # # upload data end
+        today_upload = sum(today_upload_data_series.get('data')) / 1024 / 1024
 
     key = 'user_data:%s:%s' % (
         username, (now + timedelta(days=-1)).strftime('%Y-%m-%d'))
     b_yesterday_data = r_session.get(key)
     if b_yesterday_data is None:
         yesterday_upload_data_series['data'] = []
+        return ("%.2f GB" % (today_upload / 8), "0.0 GB", "0.0 GB")
     else:
         yesterday_data = json.loads(b_yesterday_data.decode('utf-8'))
         yesterday_upload_data_series['data'] = []
@@ -294,14 +296,13 @@ def get_upload_data():
                 yesterday_upload_data_series['data'] = []
         # upload data end
 
-    today_upload = sum(today_upload_data_series.get('data')) / 1024 / 1024
-    yesterday_upload = sum(
-        yesterday_upload_data_series.get('data')) / 1024 / 1024
-    yesterday_dod = sum(yesterday_upload_data_series.get(
-        'data')[0:now.hour]) / 1024 / 1024
-    dod_upload = yesterday_upload / yesterday_dod * today_upload
-    dod_upload += yesterday_upload_data_series.get(
-        'data')[now.hour] / 1024 / 1024 * now.minute / 60
+        yesterday_upload = sum(
+            yesterday_upload_data_series.get('data')) / 1024 / 1024
+        yesterday_dod = sum(yesterday_upload_data_series.get(
+            'data')[0:now.hour]) / 1024 / 1024
+        dod_upload = yesterday_upload / yesterday_dod * today_upload
+        dod_upload += yesterday_upload_data_series.get(
+            'data')[now.hour] / 1024 / 1024 * now.minute / 60
 
     return ("%.2f GB" % (today_upload / 8), "%.2f GB" % (yesterday_upload / 8),
             "%.2f GB" % (dod_upload / 8))

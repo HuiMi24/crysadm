@@ -216,7 +216,7 @@ def save_history(username):
         extra_info = json.loads(b_extra_info.decode('utf-8'))
     if 'last_adjust_date' not in extra_info.keys():
         extra_info['last_adjust_date'] = '1997-1-1 1:1:1'
-    if datetime.now().hour < 20 and datetime.strptime(extra_info['last_adjust_date'], '%Y-%m-%d %H:%M:%S').day != datetime.now().day:
+    if datetime.now().hour < 24 and datetime.strptime(extra_info['last_adjust_date'], '%Y-%m-%d %H:%M:%S').day != datetime.now().day:
         str_yesterday = (datetime.now() + timedelta(days=-1)
                          ).strftime('%Y-%m-%d')
         yesterday_key = 'user_data:%s:%s' % (username, str_yesterday)

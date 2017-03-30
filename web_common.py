@@ -300,6 +300,8 @@ def get_upload_data():
             yesterday_upload_data_series.get('data')) / 1024 / 1024
         yesterday_dod = sum(yesterday_upload_data_series.get(
             'data')[0:now.hour]) / 1024 / 1024
+        if yesterday_dod == 0:
+            return ("%.2f GB" % (today_upload / 8), "0.0 GB", "0.0 GB")
         dod_upload = yesterday_upload / yesterday_dod * today_upload
         dod_upload += yesterday_upload_data_series.get(
             'data')[now.hour] / 1024 / 1024 * now.minute / 60

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ps -ef |grep -E 'crysadm'|grep -v grep|awk '{print $2}'|xargs sudo kill -9
+ps -ef |grep python | grep -E 'crysadm'|grep -v grep|awk '{print $2}'|xargs sudo kill -9
 
 BASE_DIR="/var/www/crysadm"
 

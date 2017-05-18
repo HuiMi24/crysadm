@@ -4,5 +4,5 @@ ps -ef |grep python | grep -E 'crysadm'|grep -v grep|awk '{print $2}'|xargs sudo
 
 BASE_DIR="/var/www/crysadm"
 
-python3 ${BASE_DIR}/crysadm.py >> /var/log/crysadm.log 2>&1 &
-python3 ${BASE_DIR}/crysadm_helper.py >> /var/log/crysadm.log 2>&1 &
+python3.4 ${BASE_DIR}/crysadm_helper.py >> /var/log/crysadm.log 2>&1 &
+uwsgi --ini /var/www/crysadm/crysadm_uwsgi.ini >> /var/log/crysadm.log 2>&1 &

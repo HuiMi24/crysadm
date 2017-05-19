@@ -1,5 +1,6 @@
 # 2017/05/19
-增加Dockerfile，可以自行根据Dockerfile构建image,/var/lib/redis是外卷，用于存放数据库。内部nginx的端口为4000
+增加Dockerfile，可以自行根据Dockerfile构建image,/var/lib/redis是外卷，用于存放数据库。内部nginx的端口为4000。
+Note: 我自己用的是树莓派，所以base是resin/rpi-raspbian。如果你使用的是x86的机器，直接修改为ubuntu就可以了。
 
 ## 1.安装docker
     请自行baidu

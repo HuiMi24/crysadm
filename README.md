@@ -1,3 +1,19 @@
+# 2017/05/19
+增加Dockerfile，可以自行根据Dockerfile构建image,/var/lib/redis是外卷，用于存放数据库。内部nginx的端口为4000
+
+## 1.安装docker
+    请自行baidu
+## 2.build image
+```bash
+    mkdir images
+    cp Dockerfile images/
+    sudo docker build -t crysadm .
+```
+## 3.执行
+```bash
+    sudo docker run -itd -p 80:4000 -v /var/lib/redis:/var/lib/redis crysadm /start.sh
+```
+
 # 2017/03/28
 修复第一次安装之后数据不显示的bug，简化安装教程。
 # 2016/12/15

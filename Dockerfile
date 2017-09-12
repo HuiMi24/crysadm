@@ -24,6 +24,8 @@ EXPOSE 4000
 EXPOSE 22
 WORKDIR /var/www/crysadm
 
+RUN chown -R redis:redis /var/lib/redis
+
 RUN touch /start.sh \
         && chmod +x /start.sh \
         && echo "#!/bin/bash" >> /start.sh \

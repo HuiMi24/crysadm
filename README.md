@@ -12,7 +12,7 @@ Note: 我自己用的是树莓派，所以base是resin/rpi-raspbian。如果你�
 ```
 ## 3.执行
 ```bash
-    sudo docker run --name=crysadm --restart=always -itd -p 4000:4000 -v <redis dump file path>:/var/lib/redis crysadm /start.sh
+    sudo docker run --name=crysadm --restart=always -itd -p 4000:4000 -v <redis dump file path>:/var/lib/redis crysadm
 ```
 
 # 2017/03/28

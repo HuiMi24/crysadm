@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ps -ef | grep -E 'crysadm' | grep -v grep  | awk '{print $2}'| xargs kill
+ps -ef | grep -E 'crysadm.*(py|ini)' | grep -v grep  | awk '{print $2}'| xargs kill
 
 BASE_DIR="/var/www/crysadm"
 

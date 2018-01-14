@@ -1,3 +1,8 @@
+# 2018/01/14
+1. fix docker image first start failed issue.
+2. output logs to console. you can check it with docker logs -f <container>
+3. update default username/password to admin/admin. it also generated with <IP>/install request. Please change the default username/password!!!!
+
 # 2017/09/21
 更新Docker base image为ubuntu，增加启动脚本，修复redis目录权限问题
 
